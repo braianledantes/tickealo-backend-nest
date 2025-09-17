@@ -11,14 +11,14 @@ export class AuthService {
   ) {}
 
   /**
-   * Validates a user by their username and password.
+   * Validates a user by their email and password.
    * Returns the user if valid, otherwise null.
-   * @param username - The username of the user.
+   * @param email - The email of the user.
    * @param password - The password of the user.
    * @returns The validated user or null.
    */
-  async validateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.usersService.findOne(username);
+  async validateUser(email: string, password: string): Promise<User | null> {
+    const user = await this.usersService.findByEmail(email);
 
     if (!user) return null;
 

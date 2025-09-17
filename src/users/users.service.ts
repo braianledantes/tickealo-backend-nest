@@ -18,4 +18,11 @@ export class UsersService {
   async findOne(username: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { username } });
   }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { email },
+      relations: ['roles'],
+    });
+  }
 }
