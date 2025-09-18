@@ -9,10 +9,12 @@ import { AuthController } from './auth.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   imports: [
     UsersModule,
+    FilesModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

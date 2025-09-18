@@ -1,18 +1,26 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  ParseFilePipeBuilder,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { User } from 'src/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
-import { User } from 'src/users/entities/user.entity';
-import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { Roles } from './decorators/roles.decorator';
+import { RegisterClienteDto } from './dtos/register-cliente.dto';
+import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { Role } from './enums/role.enum';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { registerValidadorDto } from './dtos/register-validador.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,6 +37,75 @@ export class AuthController {
   @Get('me')
   getProfile(@GetUser() user: User) {
     return user;
+  }
+
+  @Public()
+  @Post('register-productora')
+  @UseInterceptors(FileInterceptor('imagenPerfil'))
+  registerProductora(
+    @Body() registerProductoraDto: RegisterProductoraDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /(jpg|jpeg|png|gif)$/,
+        })
+        .addMaxSizeValidator(
+          { maxSize: 1024 * 1024 }, // 1MB
+        )
+        .build({
+          fileIsRequired: false,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.authService.registerProductora(registerProductoraDto, file);
+  }
+
+  @Public()
+  @Post('register-cliente')
+  @UseInterceptors(FileInterceptor('imagenPerfil'))
+  registerCliente(
+    @Body() registerClienteDto: RegisterClienteDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /(jpg|jpeg|png|gif)$/,
+        })
+        .addMaxSizeValidator(
+          { maxSize: 1024 * 1024 }, // 1MB
+        )
+        .build({
+          fileIsRequired: false,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.authService.registerCliente(registerClienteDto, file);
+  }
+
+  @Public()
+  @Post('register-validador')
+  @UseInterceptors(FileInterceptor('imagenPerfil'))
+  registerValidador(
+    @Body() registerValidadorDto: registerValidadorDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /(jpg|jpeg|png|gif)$/,
+        })
+        .addMaxSizeValidator(
+          { maxSize: 1024 * 1024 }, // 1MB
+        )
+        .build({
+          fileIsRequired: false,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.authService.registerValidador(registerValidadorDto, file);
   }
 
   // endpoint example with role-based access control

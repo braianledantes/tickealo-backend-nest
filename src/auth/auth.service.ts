@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { FileUploadService } from 'src/files/file-upload.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { RegisterProductoraDto } from './dtos/register-productora.dto';
+import { RegisterClienteDto } from './dtos/register-cliente.dto';
+import { registerValidadorDto } from './dtos/register-validador.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   /**
@@ -47,6 +52,143 @@ export class AuthService {
     const token = await this.jwtService.signAsync(payload);
     return {
       access_token: token,
+    };
+  }
+
+  async registerProductora(
+    registerProductoraDto: RegisterProductoraDto,
+    imageFile?: Express.Multer.File,
+  ) {
+    const { username, email, password, cuit, nombre, direccion, telefono } =
+      registerProductoraDto;
+
+    // Datos del usuario base
+    const userData = {
+      username,
+      email,
+      password,
+    };
+
+    // Datos específicos de la productora
+    const productoraData: {
+      cuit: string;
+      nombre: string;
+      direccion: string;
+      telefono: string;
+      imagenUrl?: string;
+    } = {
+      cuit,
+      nombre,
+      direccion,
+      telefono,
+    };
+
+    // Si hay una imagen, guardarla y agregar la URL
+    if (imageFile) {
+      const imageUrl = this.fileUploadService.saveImage(
+        imageFile,
+        'productoras',
+      );
+      productoraData.imagenUrl = imageUrl;
+    }
+
+    // Crear la productora con su usuario
+    const productora = await this.usersService.createProductora(
+      userData,
+      productoraData,
+    );
+
+    // Retornar información de la productora creada (sin el password)
+    return {
+      message: 'Productora registrada exitosamente',
+      productora,
+    };
+  }
+
+  async registerCliente(
+    registerClienteDto: RegisterClienteDto,
+    imageFile?: Express.Multer.File,
+  ) {
+    const { username, email, password } = registerClienteDto;
+
+    // Datos del usuario base
+    const userData = {
+      username,
+      email,
+      password,
+    };
+
+    // Datos específicos del cliente
+    const clienteData: {
+      nombre: string;
+      apellido: string;
+      telefono: string;
+      imagenPerfilUrl?: string;
+    } = {
+      nombre: registerClienteDto.nombre,
+      apellido: registerClienteDto.apellido,
+      telefono: registerClienteDto.telefono,
+    };
+
+    // Si hay una imagen, guardarla y agregar la URL
+    if (imageFile) {
+      const imageUrl = this.fileUploadService.saveImage(imageFile, 'clientes');
+      clienteData.imagenPerfilUrl = imageUrl;
+    }
+
+    // Crear el cliente con su usuario
+    const cliente = await this.usersService.createCliente(
+      userData,
+      clienteData,
+    );
+
+    // Retornar información del cliente creado (sin el password)
+    return {
+      message: 'Cliente registrado exitosamente',
+      cliente,
+    };
+  }
+
+  async registerValidador(
+    registerValidadorDto: registerValidadorDto,
+    imageFile?: Express.Multer.File,
+  ) {
+    const { username, email, password } = registerValidadorDto;
+
+    // Datos del usuario base
+    const userData = {
+      username,
+      email,
+      password,
+    };
+
+    // Datos específicos del validador
+    const validadorData: {
+      nombre: string;
+      imagenPerfilUrl?: string;
+    } = {
+      nombre: registerValidadorDto.nombre,
+    };
+
+    // Si hay una imagen, guardarla y agregar la URL
+    if (imageFile) {
+      const imageUrl = this.fileUploadService.saveImage(
+        imageFile,
+        'validadores',
+      );
+      validadorData.imagenPerfilUrl = imageUrl;
+    }
+
+    // Crear el validador con su usuario
+    const validador = await this.usersService.createValidador(
+      userData,
+      validadorData,
+    );
+
+    // Retornar información del validador creado (sin el password)
+    return {
+      message: 'Validador registrado exitosamente',
+      validador,
     };
   }
 }

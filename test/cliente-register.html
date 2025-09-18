@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Registro de Cliente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="file"] {
+            padding: 8px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .field-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+        .loading {
+            background-color: #e2e3e5;
+            color: #6c757d;
+        }
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success pre {
+            background-color: #f8fff8;
+            border-color: #c3e6cb;
+        }
+        .error pre {
+            background-color: #fff8f8;
+            border-color: #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test - Registro de Cliente</h1>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">Nombre de usuario:</label>
+                <input type="text" id="username" name="username" value="cliente_test" required>
+                <div class="field-info">Nombre único para identificar al usuario</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="cliente.test@example.com" required>
+                <div class="field-info">Dirección de correo electrónico válida</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" value="TestPassword123" required>
+                <div class="field-info">Mínimo 8 caracteres, debe incluir: 1 minúscula, 1 mayúscula, 1 número</div>
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" value="Juan Carlos" required>
+                <div class="field-info">Nombre real del cliente</div>
+            </div>
+
+            <div class="form-group">
+                <label for="apellido">Apellido:</label>
+                <input type="text" id="apellido" name="apellido" value="Pérez García" required>
+                <div class="field-info">Apellido del cliente</div>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" value="+5491123456789" required>
+                <div class="field-info">Número de teléfono de contacto</div>
+            </div>
+
+            <div class="form-group">
+                <label for="imagenPerfil">Imagen de perfil (opcional):</label>
+                <input type="file" id="imagenPerfil" name="imagenPerfil" accept="image/jpeg,image/jpg,image/png,image/gif">
+                <div class="field-info">Formatos aceptados: JPG, JPEG, PNG, GIF. Tamaño máximo: 1MB</div>
+            </div>
+
+            <button type="submit">Registrar Cliente</button>
+        </form>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        // URL base del servidor
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.className = 'loading';
+            responseDiv.innerHTML = 'Enviando solicitud...';
+            
+            try {
+                // Crear FormData para enviar datos incluyendo archivo
+                const formData = new FormData();
+                
+                // Agregar campos de texto
+                formData.append('username', document.getElementById('username').value);
+                formData.append('email', document.getElementById('email').value);
+                formData.append('password', document.getElementById('password').value);
+                formData.append('nombre', document.getElementById('nombre').value);
+                formData.append('apellido', document.getElementById('apellido').value);
+                formData.append('telefono', document.getElementById('telefono').value);
+                
+                // Agregar archivo si está seleccionado
+                const fileInput = document.getElementById('imagenPerfil');
+                if (fileInput.files[0]) {
+                    formData.append('imagenPerfil', fileInput.files[0]);
+                }
+                
+                // Realizar la petición
+                const response = await fetch(`${API_BASE_URL}/auth/register-cliente`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    responseDiv.className = 'success';
+                    responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    
+                    // Limpiar formulario
+                    document.getElementById('registerForm').reset();
+                } else {
+                    responseDiv.className = 'error';
+                    responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+                
+            } catch (error) {
+                responseDiv.className = 'error';
+                responseDiv.innerHTML = `<pre>Error de conexión: ${error.message}</pre>`;
+            }
+        });
+
+        // Función para llenar datos de prueba únicos
+        function fillTestData() {
+            const timestamp = Date.now();
+            const randomNum = Math.floor(Math.random() * 1000);
+            
+            document.getElementById('username').value = `cliente_${timestamp}_${randomNum}`;
+            document.getElementById('email').value = `cliente.test.${timestamp}@example.com`;
+            document.getElementById('password').value = 'TestPassword123';
+            document.getElementById('nombre').value = 'Juan Carlos';
+            document.getElementById('apellido').value = 'Pérez García';
+            document.getElementById('telefono').value = `+549112345${String(randomNum).padStart(4, '0')}`;
+        }
+
+        // Función para limpiar el formulario
+        function clearForm() {
+            document.getElementById('registerForm').reset();
+            // Restaurar valores por defecto
+            document.getElementById('username').value = 'cliente_test';
+            document.getElementById('email').value = 'cliente.test@example.com';
+            document.getElementById('password').value = 'TestPassword123';
+            document.getElementById('nombre').value = 'Juan Carlos';
+            document.getElementById('apellido').value = 'Pérez García';
+            document.getElementById('telefono').value = '+5491123456789';
+        }
+
+        // Agregar botones para datos de prueba
+        window.addEventListener('load', function() {
+            const form = document.getElementById('registerForm');
+            
+            // Botón para datos únicos
+            const testButton = document.createElement('button');
+            testButton.type = 'button';
+            testButton.textContent = '🎲 Generar datos únicos';
+            testButton.style.backgroundColor = '#28a745';
+            testButton.style.marginTop = '10px';
+            testButton.style.marginRight = '10px';
+            testButton.style.width = 'calc(50% - 5px)';
+            testButton.onclick = fillTestData;
+            
+            // Botón para limpiar
+            const clearButton = document.createElement('button');
+            clearButton.type = 'button';
+            clearButton.textContent = '🔄 Restablecer datos';
+            clearButton.style.backgroundColor = '#6c757d';
+            clearButton.style.marginTop = '10px';
+            clearButton.style.width = 'calc(50% - 5px)';
+            clearButton.onclick = clearForm;
+            
+            // Contenedor para los botones
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.gap = '10px';
+            buttonContainer.appendChild(testButton);
+            buttonContainer.appendChild(clearButton);
+            
+            form.parentNode.insertBefore(buttonContainer, form.nextSibling);
+        });
+    </script>
+</body>
+</html>
