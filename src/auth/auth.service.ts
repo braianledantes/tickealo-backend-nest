@@ -105,13 +105,12 @@ export class AuthService {
    * @param user - The user to send verification email to.
    */
   private async sendEmailVerification(user: User): Promise<void> {
-    const verificationToken = await this.generateEmailVerificationToken(user);
-
-    await this.mailService.sendEmailVerification(
-      user.email,
-      user.username,
-      verificationToken,
-    );
+    // const verificationToken = await this.generateEmailVerificationToken(user);
+    // await this.mailService.sendEmailVerification(
+    //   user.email,
+    //   user.username,
+    //   verificationToken,
+    // );
   }
 
   /**
