@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  ParseFilePipeBuilder,
   Post,
   UploadedFile,
   UseGuards,
@@ -21,6 +20,7 @@ import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { Role } from './enums/role.enum';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { registerValidadorDto } from './dtos/register-validador.dto';
+import { ImageFileValidationPipe } from './pipes/image-file-validation.pipe';
 
 @Controller('auth')
 export class AuthController {
@@ -44,19 +44,7 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('imagenPerfil'))
   registerProductora(
     @Body() registerProductoraDto: RegisterProductoraDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(jpg|jpeg|png|gif)$/,
-        })
-        .addMaxSizeValidator(
-          { maxSize: 1024 * 1024 }, // 1MB
-        )
-        .build({
-          fileIsRequired: false,
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
+    @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
     return this.authService.registerProductora(registerProductoraDto, file);
@@ -67,19 +55,7 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('imagenPerfil'))
   registerCliente(
     @Body() registerClienteDto: RegisterClienteDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(jpg|jpeg|png|gif)$/,
-        })
-        .addMaxSizeValidator(
-          { maxSize: 1024 * 1024 }, // 1MB
-        )
-        .build({
-          fileIsRequired: false,
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
+    @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
     return this.authService.registerCliente(registerClienteDto, file);
@@ -90,19 +66,7 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('imagenPerfil'))
   registerValidador(
     @Body() registerValidadorDto: registerValidadorDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(jpg|jpeg|png|gif)$/,
-        })
-        .addMaxSizeValidator(
-          { maxSize: 1024 * 1024 }, // 1MB
-        )
-        .build({
-          fileIsRequired: false,
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
+    @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
     return this.authService.registerValidador(registerValidadorDto, file);
