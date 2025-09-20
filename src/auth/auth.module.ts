@@ -10,6 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { FilesModule } from 'src/files/files.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FilesModule } from 'src/files/files.module';
         },
       }),
     }),
+    MailModule,
   ],
   providers: [
     AuthService,

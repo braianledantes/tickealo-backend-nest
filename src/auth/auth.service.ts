@@ -1,11 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { FileUploadService } from 'src/files/file-upload.service';
+import { MailService } from 'src/mail/mail.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
+import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { registerValidadorDto } from './dtos/register-validador.dto';
+import { EmailVerificationPayload } from './interfaces/email-verification-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +20,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly fileUploadService: FileUploadService,
+    private readonly mailService: MailService,
   ) {}
 
   /**
@@ -53,6 +61,80 @@ export class AuthService {
     return {
       access_token: token,
     };
+  }
+
+  /**
+   * Generates a JWT token for email verification.
+   * @param user - The user to generate a verification token for.
+   * @returns A verification token.
+   */
+  private async generateEmailVerificationToken(user: User): Promise<string> {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    // Token expires in 24 hours
+    return this.jwtService.signAsync(payload, { expiresIn: '24h' });
+  }
+
+  /**
+   * Verifies an email verification token.
+   * @param token - The JWT token to verify.
+   * @returns The decoded payload if valid.
+   */
+  async verifyEmailVerificationToken(
+    token: string,
+  ): Promise<EmailVerificationPayload> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const payload = await this.jwtService.verifyAsync(token);
+
+      if (!payload || typeof payload !== 'object') {
+        throw new BadRequestException('Invalid token type');
+      }
+
+      return payload as EmailVerificationPayload;
+    } catch {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+  }
+
+  /**
+   * Sends an email verification to the user.
+   * @param user - The user to send verification email to.
+   */
+  private async sendEmailVerification(user: User): Promise<void> {
+    const verificationToken = await this.generateEmailVerificationToken(user);
+
+    await this.mailService.sendEmailVerification(
+      user.email,
+      user.username,
+      verificationToken,
+    );
+  }
+
+  /**
+   * Verifies a user's email using the verification token.
+   * @param token - The JWT verification token.
+   * @returns Success message.
+   */
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const payload = await this.verifyEmailVerificationToken(token);
+
+    const user = await this.usersService.findByEmail(payload.email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.emailVerifiedAt) {
+      return { message: 'Email already verified' };
+    }
+
+    // Mark email as verified
+    await this.usersService.markEmailAsVerified(user.id);
+
+    return { message: 'Email verified successfully' };
   }
 
   async registerProductora(
@@ -98,9 +180,17 @@ export class AuthService {
       productoraData,
     );
 
+    if (!productora) {
+      throw new InternalServerErrorException('Failed to create productora');
+    }
+
+    // Enviar email de verificación
+    await this.sendEmailVerification(productora.user);
+
     // Retornar información de la productora creada (sin el password)
     return {
-      message: 'Productora registrada exitosamente',
+      message:
+        'Productora registrada exitosamente. Revisa tu email para verificar tu cuenta.',
       productora,
     };
   }
@@ -142,9 +232,17 @@ export class AuthService {
       clienteData,
     );
 
+    if (!cliente) {
+      throw new InternalServerErrorException('Failed to create cliente');
+    }
+
+    // Enviar email de verificación
+    await this.sendEmailVerification(cliente.user);
+
     // Retornar información del cliente creado (sin el password)
     return {
-      message: 'Cliente registrado exitosamente',
+      message:
+        'Cliente registrado exitosamente. Revisa tu email para verificar tu cuenta.',
       cliente,
     };
   }
@@ -185,9 +283,17 @@ export class AuthService {
       validadorData,
     );
 
+    if (!validador) {
+      throw new InternalServerErrorException('Failed to create validador');
+    }
+
+    // Enviar email de verificación
+    await this.sendEmailVerification(validador.user);
+
     // Retornar información del validador creado (sin el password)
     return {
-      message: 'Validador registrado exitosamente',
+      message:
+        'Validador registrado exitosamente. Revisa tu email para verificar tu cuenta.',
       validador,
     };
   }
