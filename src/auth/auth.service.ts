@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { FileUploadService } from 'src/files/file-upload.service';
 import { User } from 'src/users/entities/user.entity';
@@ -98,11 +98,12 @@ export class AuthService {
       productoraData,
     );
 
-    // Retornar información de la productora creada (sin el password)
-    return {
-      message: 'Productora registrada exitosamente',
-      productora,
-    };
+    if (!productora) {
+      throw new InternalServerErrorException('Error creating productora');
+    }
+
+    // Generar token de acceso para la productora recién registrada
+    return await this.generateAccessToken(productora.user);
   }
 
   async registerCliente(
@@ -142,11 +143,12 @@ export class AuthService {
       clienteData,
     );
 
-    // Retornar información del cliente creado (sin el password)
-    return {
-      message: 'Cliente registrado exitosamente',
-      cliente,
-    };
+    if (!cliente) {
+      throw new InternalServerErrorException('Error creating cliente');
+    }
+
+    // Generar token de acceso para el cliente recién registrado
+    return await this.generateAccessToken(cliente.user);
   }
 
   async registerValidador(
@@ -185,10 +187,11 @@ export class AuthService {
       validadorData,
     );
 
-    // Retornar información del validador creado (sin el password)
-    return {
-      message: 'Validador registrado exitosamente',
-      validador,
-    };
+    if (!validador) {
+      throw new InternalServerErrorException('Error creating validador');
+    }
+
+    // Generar token de acceso para el validador recién registrado
+    return await this.generateAccessToken(validador.user);
   }
 }
