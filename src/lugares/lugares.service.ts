@@ -23,15 +23,12 @@ export class LugaresService {
    * @throws BadRequestException si ya existe un lugar con las mismas coordenadas y dirección.
    */
   async create(createLugareDto: CreateLugarDto) {
-    // TODO: Ver porque da error 500 cuando ya existe el lugar, da null
     const existingLugar = await this.lugaresRepository.findOne({
-      where: [
-        {
-          latitud: createLugareDto.latitud,
-          longitud: createLugareDto.longitud,
-          direccion: createLugareDto.direccion,
-        },
-      ],
+      where: {
+        latitud: createLugareDto.latitud,
+        longitud: createLugareDto.longitud,
+        direccion: createLugareDto.direccion,
+      },
     });
 
     if (existingLugar) {

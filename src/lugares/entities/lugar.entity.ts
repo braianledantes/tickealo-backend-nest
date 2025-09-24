@@ -11,13 +11,13 @@ export class Lugar {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'decimal', precision: 11, scale: 8, unique: true })
+  @Column({ type: 'decimal', precision: 17, scale: 14 })
   latitud: number;
 
-  @Column({ type: 'decimal', precision: 11, scale: 8, unique: true })
+  @Column({ type: 'decimal', precision: 17, scale: 14 })
   longitud: number;
 
-  @Column({ unique: true })
+  @Column()
   direccion: string;
 
   @Column()

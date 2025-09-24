@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
@@ -15,7 +16,6 @@ import {
 import { CreateLugarDto } from './dto/create-lugar.dto';
 import { UpdateLugarDto } from './dto/update-lugar.dto';
 import { LugaresService } from './lugares.service';
-import { LugaresCernanosDto } from './dto/lugares-cernanos.dto';
 
 @Controller('lugares')
 export class LugaresController {
@@ -31,10 +31,12 @@ export class LugaresController {
     return this.lugaresService.findAll();
   }
 
-  // TODO: Cambiar a params
-  @Get('cercanos')
-  findClosePlaces(@Body() lugaresCercanosDto: LugaresCernanosDto) {
-    const { latitud, longitud, radius } = lugaresCercanosDto;
+  @Get(':latitud/:longitud')
+  findClosePlaces(
+    @Param('latitud', ParseFloatPipe) latitud: number,
+    @Param('longitud', ParseFloatPipe) longitud: number,
+    @Query('radius', new DefaultValuePipe(5), ParseFloatPipe) radius: number,
+  ) {
     return this.lugaresService.findClosePlaces(latitud, longitud, radius);
   }
 
