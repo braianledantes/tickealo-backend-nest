@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { CuentaBancariaModule } from './cuentabancaria/cuenta-bancaria.module';
+import { LugaresModule } from './lugares/lugares.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CuentaBancariaModule } from './cuentabancaria/cuenta-bancaria.module';
     AuthModule,
     UsersModule,
     CuentaBancariaModule,
+    LugaresModule,
   ],
   controllers: [AppController],
   providers: [AppService],
