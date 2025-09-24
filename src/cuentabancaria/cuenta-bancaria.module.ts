@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CuentaBancaria } from './entities/cuenta-bancaria.entity';
 import { CuentaBancariaController } from './cuenta-bancaria.controller';
 import { CuentaBancariaService } from './cuenta-bancaria.service';
-import { Productora } from 'src/users/entities/productora.entity';
+import { CuentaBancaria } from './entities/cuenta-bancaria.entity';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CuentaBancaria, Productora])],
+  imports: [TypeOrmModule.forFeature([CuentaBancaria]), UsersModule],
   controllers: [CuentaBancariaController],
   providers: [CuentaBancariaService],
 })

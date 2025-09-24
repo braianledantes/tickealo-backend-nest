@@ -4,19 +4,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Productora } from 'src/users/entities/productora.entity';
 import { Repository } from 'typeorm';
 import { CreateCuentaBancariaDto } from './dto/create-cuenta-bancaria.dto';
 import { UpdateCuentaBancariaDto } from './dto/update-cuenta-bancaria.dto';
 import { CuentaBancaria } from './entities/cuenta-bancaria.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class CuentaBancariaService {
   constructor(
     @InjectRepository(CuentaBancaria)
     private readonly cuentaBancariaRepository: Repository<CuentaBancaria>,
-    @InjectRepository(Productora)
-    private readonly productoraRepository: Repository<Productora>,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -30,7 +29,7 @@ export class CuentaBancariaService {
     userId: number,
     createCuentaBancariaDto: CreateCuentaBancariaDto,
   ) {
-    const productora = await this.productoraRepository.findOneBy({ userId });
+    const productora = await this.usersService.findProductoraByUserId(userId);
     if (!productora) {
       throw new NotFoundException('Productora not found');
     }

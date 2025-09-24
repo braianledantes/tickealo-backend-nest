@@ -166,4 +166,31 @@ export class UsersService {
       where: { userId: user.id },
     });
   }
+
+  /**
+   * Finds a Productora, Validador, or Cliente profile by the associated user ID.
+   * @param userId - The ID of the user.
+   * @returns The associated profile (Productora, Validador, or Cliente) or null if none found.
+   */
+  findProductoraByUserId(userId: number): Promise<Productora | null> {
+    return this.productorasRepository.findOneBy({ userId });
+  }
+
+  /**
+   * Finds a Validador profile by the associated user ID.
+   * @param userId - The ID of the user.
+   * @returns The associated Validador profile or null if none found.
+   */
+  findValidadorByUserId(userId: number): Promise<Validador | null> {
+    return this.validadoresRepository.findOneBy({ userId });
+  }
+
+  /**
+   * Finds a Cliente profile by the associated user ID.
+   * @param userId - The ID of the user.
+   * @returns The associated Cliente profile or null if none found.
+   */
+  findClienteByUserId(userId: number): Promise<Cliente | null> {
+    return this.clientesRepository.findOneBy({ userId });
+  }
 }
