@@ -1,3 +1,4 @@
+import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { User } from './user.entity';
 
@@ -21,6 +22,9 @@ export class Productora {
 
   @Column()
   telefono: string;
+
+  @OneToOne(() => CuentaBancaria, (cuentaBancaria) => cuentaBancaria.productora)
+  cuentaBancaria?: CuentaBancaria;
 
   @Column({ name: 'imagen_url', nullable: true, type: 'varchar' })
   imagenUrl: string | null;
