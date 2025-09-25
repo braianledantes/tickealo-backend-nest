@@ -11,16 +11,14 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from 'src/users/entities/user.entity';
+import { ImageFileValidationPipe } from '../files/pipes/image-file-validation.pipe';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
 import { Public } from './decorators/public.decorator';
-import { Roles } from './decorators/roles.decorator';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
-import { Role } from './enums/role.enum';
-import { LocalAuthGuard } from './guards/local-auth.guard';
 import { registerValidadorDto } from './dtos/register-validador.dto';
-import { ImageFileValidationPipe } from '../files/pipes/image-file-validation.pipe';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -70,35 +68,5 @@ export class AuthController {
     file?: Express.Multer.File,
   ) {
     return this.authService.registerValidador(registerValidadorDto, file);
-  }
-
-  // endpoint example with role-based access control
-  @Roles(Role.Admin)
-  @Get('admin')
-  getAdminContent(@GetUser() user: User) {
-    return {
-      message: 'This content is only for admins',
-      user,
-    };
-  }
-
-  // endpoint example with role-based access control
-  @Roles(Role.Productora, Role.Admin)
-  @Get('productora')
-  getProductoraContent(@GetUser() user: User) {
-    return {
-      message: 'This content is only for productoras and admins',
-      user,
-    };
-  }
-
-  // endpoint example with role-based access control
-  @Roles(Role.Validador)
-  @Get('validador')
-  getValidadorContent(@GetUser() user: User) {
-    return {
-      message: 'This content is only for validadores',
-      user,
-    };
   }
 }
