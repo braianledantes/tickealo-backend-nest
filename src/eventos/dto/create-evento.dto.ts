@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsBoolean,
   IsDate,
   IsDefined,
@@ -67,6 +68,7 @@ export class CreateEventoDto {
       'Listado de tipos de entradas con su precio y cantidad disponible',
   })
   @IsDefined()
+  @ArrayMinSize(1, { message: 'Debe haber al menos un tipo de entrada' })
   entradas: { tipo: string; precio: number; cantidad: number }[];
 
   @ApiProperty({
