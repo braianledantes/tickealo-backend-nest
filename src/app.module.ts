@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { CuentaBancariaModule } from './cuentabancaria/cuenta-bancaria.module';
 import { LugaresModule } from './lugares/lugares.module';
+import { EventosModule } from './eventos/eventos.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LugaresModule } from './lugares/lugares.module';
     UsersModule,
     CuentaBancariaModule,
     LugaresModule,
+    EventosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,13 +1,15 @@
-import { Productora } from '../../users/entities/productora.entity';
+import { Evento } from '../../eventos/entities/evento.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Productora } from '../../users/entities/productora.entity';
 
 @Entity({ name: 'cuenta_bancaria' })
 export class CuentaBancaria {
@@ -34,6 +36,9 @@ export class CuentaBancaria {
 
   @Column()
   instrucciones: string;
+
+  @OneToMany(() => Evento, (evento) => evento.cuentaBancaria)
+  eventos: Evento[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

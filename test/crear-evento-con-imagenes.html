@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Crear Evento con Imágenes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="file"],
+        input[type="number"],
+        input[type="datetime-local"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .note {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .entrada-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .entrada-item h4 {
+            margin-top: 0;
+            color: #555;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .col {
+            flex: 1;
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crear Evento con Imágenes - Test</h1>
+        
+        <div class="note">
+            <strong>Nota:</strong> 
+            <ul>
+                <li>Asegúrate de tener un token JWT válido de una productora</li>
+                <li>Las imágenes deben ser JPG, JPEG, PNG o GIF (máx. 1MB)</li>
+                <li>Ajusta la URL base si tu servidor corre en otro puerto</li>
+            </ul>
+        </div>
+
+        <form id="crearEventoForm" enctype="multipart/form-data">
+            <!-- Token -->
+            <div class="form-group">
+                <label for="token">Token JWT (Productora):</label>
+                <input type="text" id="token" name="token" placeholder="Pegar token JWT aquí" required>
+            </div>
+
+            <!-- Información básica del evento -->
+            <h3>Información del Evento</h3>
+            <div class="form-group">
+                <label for="nombre">Nombre del Evento:</label>
+                <input type="text" id="nombre" name="nombre" value="Concierto de Rock 2025" required>
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" required>Un increíble concierto de rock con las mejores bandas locales. Una noche llena de música, diversión y grandes momentos.</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="inicioAt">Fecha y Hora de Inicio:</label>
+                        <input type="datetime-local" id="inicioAt" name="inicioAt" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="finAt">Fecha y Hora de Fin:</label>
+                        <input type="datetime-local" id="finAt" name="finAt" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imágenes -->
+            <h3>Imágenes del Evento</h3>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="portada">Imagen de Portada:</label>
+                        <input type="file" id="portada" name="portada" accept="image/jpeg,image/jpg,image/png,image/gif">
+                        <img id="portadaPreview" class="image-preview" style="display: none;">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="banner">Imagen de Banner:</label>
+                        <input type="file" id="banner" name="banner" accept="image/jpeg,image/jpg,image/png,image/gif">
+                        <img id="bannerPreview" class="image-preview" style="display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ubicación -->
+            <h3>Ubicación del Evento</h3>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="latitud">Latitud:</label>
+                        <input type="number" step="any" id="latitud" name="latitud" value="-34.6118" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="longitud">Longitud:</label>
+                        <input type="number" step="any" id="longitud" name="longitud" value="-58.3960" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="direccion">Dirección:</label>
+                <input type="text" id="direccion" name="direccion" value="Av. Corrientes 1234" required>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="ciudad">Ciudad:</label>
+                        <input type="text" id="ciudad" name="ciudad" value="Buenos Aires" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="provincia">Provincia:</label>
+                        <input type="text" id="provincia" name="provincia" value="CABA" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entradas -->
+            <h3>Tipos de Entradas</h3>
+            <div id="entradasContainer">
+                <div class="entrada-item">
+                    <h4>Entrada General</h4>
+                    <div class="row">
+                        <div class="col">
+                            <label>Tipo:</label>
+                            <input type="text" name="entradas[0][tipo]" value="General" required>
+                        </div>
+                        <div class="col">
+                            <label>Precio:</label>
+                            <input type="number" name="entradas[0][precio]" value="5000" required>
+                        </div>
+                        <div class="col">
+                            <label>Cantidad:</label>
+                            <input type="number" name="entradas[0][cantidad]" value="200" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="entrada-item">
+                    <h4>Entrada VIP</h4>
+                    <div class="row">
+                        <div class="col">
+                            <label>Tipo:</label>
+                            <input type="text" name="entradas[1][tipo]" value="VIP" required>
+                        </div>
+                        <div class="col">
+                            <label>Precio:</label>
+                            <input type="number" name="entradas[1][precio]" value="15000" required>
+                        </div>
+                        <div class="col">
+                            <label>Cantidad:</label>
+                            <input type="number" name="entradas[1][cantidad]" value="50" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cuenta Bancaria -->
+            <div class="form-group">
+                <label for="cuentaBancariaId">ID Cuenta Bancaria:</label>
+                <input type="number" id="cuentaBancariaId" name="cuentaBancariaId" value="1" required>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="cancelado" name="cancelado" value="false">
+                    Evento Cancelado
+                </label>
+            </div>
+
+            <button type="submit">Crear Evento</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Establecer fechas por defecto
+        const now = new Date();
+        const inicioDate = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // Mañana
+        const finDate = new Date(inicioDate.getTime() + (3 * 60 * 60 * 1000)); // 3 horas después
+
+        document.getElementById('inicioAt').value = inicioDate.toISOString().slice(0, 16);
+        document.getElementById('finAt').value = finDate.toISOString().slice(0, 16);
+
+        // Preview de imágenes
+        function setupImagePreview(inputId, previewId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const preview = document.getElementById(previewId);
+                
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+        }
+
+        setupImagePreview('portada', 'portadaPreview');
+        setupImagePreview('banner', 'bannerPreview');
+
+        // Manejar envío del formulario
+        document.getElementById('crearEventoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            const token = document.getElementById('token').value;
+            
+            if (!token) {
+                resultDiv.innerHTML = '<div class="error">Por favor ingresa un token JWT válido</div>';
+                return;
+            }
+
+            const formData = new FormData();
+            
+            // Agregar archivos de imagen si están presentes
+            const portadaFile = document.getElementById('portada').files[0];
+            const bannerFile = document.getElementById('banner').files[0];
+            
+            if (portadaFile) {
+                formData.append('portada', portadaFile);
+            }
+            
+            if (bannerFile) {
+                formData.append('banner', bannerFile);
+            }
+
+            // Construir el objeto JSON con los datos del evento
+            const eventoData = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                inicioAt: new Date(document.getElementById('inicioAt').value).toISOString(),
+                finAt: new Date(document.getElementById('finAt').value).toISOString(),
+                cancelado: document.getElementById('cancelado').checked,
+                lugar: {
+                    latitud: parseFloat(document.getElementById('latitud').value),
+                    longitud: parseFloat(document.getElementById('longitud').value),
+                    direccion: document.getElementById('direccion').value,
+                    ciudad: document.getElementById('ciudad').value,
+                    provincia: document.getElementById('provincia').value
+                },
+                entradas: [
+                    {
+                        tipo: document.querySelector('input[name="entradas[0][tipo]"]').value,
+                        precio: parseInt(document.querySelector('input[name="entradas[0][precio]"]').value),
+                        cantidad: parseInt(document.querySelector('input[name="entradas[0][cantidad]"]').value)
+                    },
+                    {
+                        tipo: document.querySelector('input[name="entradas[1][tipo]"]').value,
+                        precio: parseInt(document.querySelector('input[name="entradas[1][precio]"]').value),
+                        cantidad: parseInt(document.querySelector('input[name="entradas[1][cantidad]"]').value)
+                    }
+                ],
+                cuentaBancariaId: parseInt(document.getElementById('cuentaBancariaId').value)
+            };
+
+            // Agregar los datos JSON como string en el FormData
+            Object.keys(eventoData).forEach(key => {
+                if (key === 'lugar' || key === 'entradas') {
+                    formData.append(key, JSON.stringify(eventoData[key]));
+                } else {
+                    formData.append(key, eventoData[key]);
+                }
+            });
+
+            try {
+                resultDiv.innerHTML = '<div>Creando evento...</div>';
+                
+                const response = await fetch('http://localhost:3000/api/eventos', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>¡Evento creado exitosamente!</strong><br>
+                            ID: ${data.id}<br>
+                            Nombre: ${data.nombre}<br>
+                            ${data.portadaUrl ? `Portada: <a href="${data.portadaUrl}" target="_blank">Ver imagen</a><br>` : ''}
+                            ${data.bannerUrl ? `Banner: <a href="${data.bannerUrl}" target="_blank">Ver imagen</a><br>` : ''}
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>Error al crear evento:</strong><br>
+                            ${data.message || 'Error desconocido'}<br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Error de conexión:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

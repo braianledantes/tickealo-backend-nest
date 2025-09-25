@@ -1,6 +1,14 @@
 import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { User } from './user.entity';
+import { Evento } from '../../eventos/entities/evento.entity';
 
 @Entity()
 export class Productora {
@@ -34,4 +42,7 @@ export class Productora {
 
   @Column({ type: 'float', default: 0 })
   calificacion: number;
+
+  @OneToMany(() => Evento, (evento) => evento.productora)
+  eventos: Evento[];
 }

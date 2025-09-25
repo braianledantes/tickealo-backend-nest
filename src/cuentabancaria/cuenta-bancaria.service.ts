@@ -76,6 +76,24 @@ export class CuentaBancariaService {
   }
 
   /**
+   * Finds a CuentaBancaria entity by its ID.
+   * @param id - The ID of the CuentaBancaria to find.
+   * @throws NotFoundException if the CuentaBancaria does not exist.
+   * @returns The found CuentaBancaria entity.
+   */
+  async findById(id: number) {
+    const cuentaBancaria = await this.cuentaBancariaRepository.findOne({
+      where: { id },
+    });
+
+    if (!cuentaBancaria) {
+      throw new NotFoundException('CuentaBancaria not found');
+    }
+
+    return cuentaBancaria;
+  }
+
+  /**
    * Updates a CuentaBancaria entity associated with a given Productora user ID.
    * @param userId - The ID of the Productora user.
    * @param updateCuentaBancariaDto - The data to update the CuentaBancaria with.

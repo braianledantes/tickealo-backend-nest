@@ -20,7 +20,7 @@ import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { Role } from './enums/role.enum';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { registerValidadorDto } from './dtos/register-validador.dto';
-import { ImageFileValidationPipe } from './pipes/image-file-validation.pipe';
+import { ImageFileValidationPipe } from '../files/pipes/image-file-validation.pipe';
 
 @Controller('auth')
 export class AuthController {

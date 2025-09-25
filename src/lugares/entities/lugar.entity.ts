@@ -1,7 +1,9 @@
+import { Evento } from '../../eventos/entities/evento.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -25,6 +27,9 @@ export class Lugar {
 
   @Column()
   provincia: string;
+
+  @OneToMany(() => Evento, (evento) => evento.lugar)
+  eventos: Evento[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

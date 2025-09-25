@@ -42,6 +42,29 @@ export class LugaresService {
   }
 
   /**
+   * Crea un nuevo lugar si no existe uno con las mismas coordenadas y dirección.
+   * Si ya existe, devuelve el lugar existente.
+   * @param createLugareDto Datos del lugar a crear o buscar.
+   * @returns El lugar creado o el existente.
+   */
+  async upsert(createLugareDto: CreateLugarDto) {
+    const existingLugar = await this.lugaresRepository.findOne({
+      where: {
+        latitud: createLugareDto.latitud,
+        longitud: createLugareDto.longitud,
+        direccion: createLugareDto.direccion,
+      },
+    });
+
+    if (existingLugar) {
+      return existingLugar;
+    }
+
+    const newLugar = this.lugaresRepository.create(createLugareDto);
+    return this.lugaresRepository.save(newLugar);
+  }
+
+  /**
    * Obtiene todos los lugares.
    * @returns Una lista de todos los lugares.
    */

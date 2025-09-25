@@ -14,7 +14,7 @@ import {
 export class ImageFileValidationPipe implements PipeTransform {
   private readonly parseFilePipe = new ParseFilePipeBuilder()
     .addFileTypeValidator({
-      fileType: /(jpg|jpeg|png|gif)$/,
+      fileType: /(jpg|jpeg|png|gif)$/i,
     })
     .addMaxSizeValidator({
       maxSize: 1024 * 1024, // 1MB
