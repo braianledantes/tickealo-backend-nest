@@ -8,10 +8,11 @@ import { UpdateEventoDto } from './dto/update-evento.dto';
 import { UsersService } from 'src/users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Evento } from './entities/evento.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CuentaBancariaService } from 'src/cuentabancaria/cuenta-bancaria.service';
 import { LugaresService } from 'src/lugares/lugares.service';
 import { FileUploadService } from 'src/files/file-upload.service';
+import { PaginationDto } from 'src/commun/dto/pagination.dto';
 
 @Injectable()
 export class EventosService {
@@ -77,13 +78,35 @@ export class EventosService {
     });
   }
 
-  /** Devuelve todos los eventos.
-   * @returns Lista de eventos.
+  /**
+   * Devuelve una lista paginada de eventos, con soporte para búsqueda y ordenación.
+   * @param search Término de búsqueda para filtrar eventos por nombre o descripción.
+   * @param page Número de página (1-based).
+   * @param limit Número de elementos por página.
+   * @param orderDir Dirección de ordenación ('ASC' o 'DESC').
+   * @returns Un objeto con los eventos paginados y metadatos.
    */
-  findAll() {
-    return this.eventoRepository.find({
+  async findAllPaginated(paginationDto: PaginationDto) {
+    const { search, page, limit, orderDir } = paginationDto;
+    const [result, total] = await this.eventoRepository.findAndCount({
       relations: ['lugar', 'productora'],
+      skip: (page - 1) * limit,
+      take: limit,
+      where: search
+        ? [
+            { nombre: ILike(`%${search}%`) },
+            { descripcion: ILike(`%${search}%`) },
+          ]
+        : {},
+      order: { nombre: orderDir },
     });
+    return {
+      data: result,
+      total,
+      page,
+      hasNextPage: total > page * limit,
+      hasPreviousPage: page > 1,
+    };
   }
 
   /** Devuelve un evento por su ID.

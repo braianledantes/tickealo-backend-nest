@@ -16,6 +16,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
+import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { MultipleImageFileValidationPipe } from 'src/files/pipes/multiple-image-file-validation.pipe';
 import { CreateEventoDto } from './dto/create-evento.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
@@ -43,8 +44,8 @@ export class EventosController {
   }
 
   @Get()
-  findAll() {
-    return this.eventosService.findAll();
+  findAll(@Body() paginationDto: PaginationDto) {
+    return this.eventosService.findAllPaginated(paginationDto);
   }
 
   @Get(':id')
