@@ -38,6 +38,17 @@ export class EventosService {
     createEventoDto: CreateEventoDto,
     files?: { portada?: Express.Multer.File[]; banner?: Express.Multer.File[] },
   ) {
+    // TODO: esta no es la mejor forma de manejar arrays en DTOs multipart/form-data
+    // pero es una solución rápida. Idealmente, el cliente debería enviar JSON.
+    // Alternativamente, podríamos usar un middleware personalizado para parsear
+    // los campos JSON automáticamente.
+    createEventoDto.entradas = JSON.parse(
+      createEventoDto.entradas as unknown as string,
+    );
+    createEventoDto.lugar = JSON.parse(
+      createEventoDto.lugar as unknown as string,
+    );
+
     const productora = await this.userService.findProductoraByUserId(userId);
     const cuentaBancaria = await this.cuentaBancariaService.findById(
       createEventoDto.cuentaBancariaId,

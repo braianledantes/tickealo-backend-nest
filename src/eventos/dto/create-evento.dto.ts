@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
   IsBoolean,
   IsDate,
   IsDefined,
@@ -49,6 +48,16 @@ export class CreateEventoDto {
   @Type(() => Boolean)
   cancelado: boolean;
 
+  @ApiProperty({
+    example: {
+      latitud: -34.6037,
+      longitud: -58.3816,
+      direccion: 'Av. Corrientes 1234',
+      ciudad: 'Buenos Aires',
+      provincia: 'Buenos Aires',
+    },
+    description: 'Ubicación del evento',
+  })
   @IsDefined()
   lugar: {
     latitud: number;
@@ -68,7 +77,7 @@ export class CreateEventoDto {
       'Listado de tipos de entradas con su precio y cantidad disponible',
   })
   @IsDefined()
-  @ArrayMinSize(1, { message: 'Debe haber al menos un tipo de entrada' })
+  //@ArrayMinSize(1, { message: 'Debe haber al menos un tipo de entrada' })
   entradas: { tipo: string; precio: number; cantidad: number }[];
 
   @ApiProperty({
