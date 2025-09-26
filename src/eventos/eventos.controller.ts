@@ -29,19 +29,27 @@ export class EventosController {
 
   @Roles(Role.Productora)
   @Post()
+  create(
+    @GetUser('id') userId: number,
+    @Body() createEventoDto: CreateEventoDto,
+  ) {
+    return this.eventosService.create(userId, createEventoDto);
+  }
+
+  @Patch(':id/imagenes')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'portada', maxCount: 1 },
       { name: 'banner', maxCount: 1 },
     ]),
   )
-  create(
+  updateImagenes(
     @GetUser('id') userId: number,
-    @Body() createEventoDto: CreateEventoDto,
+    @Param('id', ParseIntPipe) id: number,
     @UploadedFiles(new MultipleImageFileValidationPipe())
     files: { portada?: Express.Multer.File[]; banner?: Express.Multer.File[] },
   ) {
-    return this.eventosService.create(userId, createEventoDto, files);
+    return this.eventosService.updateImagenes(userId, id, files);
   }
 
   @Get()
@@ -56,20 +64,12 @@ export class EventosController {
 
   @Roles(Role.Productora)
   @Patch(':id')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'portada', maxCount: 1 },
-      { name: 'banner', maxCount: 1 },
-    ]),
-  )
   update(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEventoDto: UpdateEventoDto,
-    @UploadedFiles(new MultipleImageFileValidationPipe())
-    files: { portada?: Express.Multer.File[]; banner?: Express.Multer.File[] },
   ) {
-    return this.eventosService.update(userId, id, updateEventoDto, files);
+    return this.eventosService.update(userId, id, updateEventoDto);
   }
 
   @Roles(Role.Productora, Role.Admin)

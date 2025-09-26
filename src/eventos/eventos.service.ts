@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -29,25 +30,16 @@ export class EventosService {
   /** Crea un nuevo evento asociado a la productora del usuario.
    * @param userId ID del usuario que crea el evento.
    * @param createEventoDto Datos del evento a crear.
-   * @param files Archivos de imagen (portada y banner) opcionales.
    * @returns El evento creado.
    * @throws UnauthorizedException si el usuario no es una productora.
+   * @throws BadRequestException si las fechas son inválidas.
    */
-  async create(
-    userId: number,
-    createEventoDto: CreateEventoDto,
-    files?: { portada?: Express.Multer.File[]; banner?: Express.Multer.File[] },
-  ) {
-    // TODO: esta no es la mejor forma de manejar arrays en DTOs multipart/form-data
-    // pero es una solución rápida. Idealmente, el cliente debería enviar JSON.
-    // Alternativamente, podríamos usar un middleware personalizado para parsear
-    // los campos JSON automáticamente.
-    createEventoDto.entradas = JSON.parse(
-      createEventoDto.entradas as unknown as string,
-    );
-    createEventoDto.lugar = JSON.parse(
-      createEventoDto.lugar as unknown as string,
-    );
+  async create(userId: number, createEventoDto: CreateEventoDto) {
+    if (createEventoDto.inicioAt >= createEventoDto.finAt) {
+      throw new BadRequestException(
+        'La fecha de inicio debe ser anterior a la fecha de fin',
+      );
+    }
 
     const productora = await this.userService.findProductoraByUserId(userId);
     const cuentaBancaria = await this.cuentaBancariaService.findById(
@@ -59,6 +51,47 @@ export class EventosService {
     }
 
     const lugar = await this.lugaresService.upsert(createEventoDto.lugar);
+
+    const evento = this.eventoRepository.create({
+      ...createEventoDto,
+      lugar,
+      productora,
+      cuentaBancaria,
+    });
+    const eventoSaved = await this.eventoRepository.save(evento);
+    return this.eventoRepository.findOne({
+      where: { id: eventoSaved.id },
+      relations: ['lugar', 'productora', 'cuentaBancaria'],
+    });
+  }
+
+  /**
+   * Actualiza las imágenes (portada y banner) de un evento existente.
+   * @param userId ID del usuario que intenta actualizar las imágenes.
+   * @param id ID del evento a actualizar.
+   * @param files Archivos de imagen (portada y banner) opcionales.
+   * @returns El evento actualizado con las nuevas URLs de las imágenes.
+   * @throws NotFoundException si el evento no existe.
+   * @throws UnauthorizedException si el usuario no tiene permiso para actualizar el evento.
+   */
+  async updateImagenes(
+    userId: number,
+    id: number,
+    files?: {
+      portada?: Express.Multer.File[];
+      banner?: Express.Multer.File[];
+    },
+  ) {
+    const productora = await this.userService.findProductoraByUserId(userId);
+
+    if (!productora) {
+      throw new UnauthorizedException('Productora not found');
+    }
+
+    const evento = await this.findOne(id);
+    if (!evento) {
+      throw new NotFoundException('Evento not found');
+    }
 
     // Procesar archivos de imagen si están presentes
     let portadaUrl: string | undefined;
@@ -75,19 +108,9 @@ export class EventosService {
       bannerUrl = this.fileUploadService.saveImage(files.banner[0], 'eventos');
     }
 
-    const evento = this.eventoRepository.create({
-      ...createEventoDto,
-      lugar,
-      productora,
-      cuentaBancaria,
-      portadaUrl,
-      bannerUrl,
-    });
-    const eventoSaved = await this.eventoRepository.save(evento);
-    return this.eventoRepository.findOne({
-      where: { id: eventoSaved.id },
-      relations: ['lugar', 'productora', 'cuentaBancaria'],
-    });
+    Object.assign(evento, { portadaUrl, bannerUrl });
+    await this.eventoRepository.save(evento);
+    return this.findOne(id);
   }
 
   /**
@@ -215,17 +238,21 @@ export class EventosService {
    * @param userId ID del usuario que intenta actualizar el evento.
    * @param id ID del evento a actualizar.
    * @param updateEventoDto Datos para actualizar el evento.
-   * @param files Archivos de imagen (portada y banner) opcionales.
    * @returns El evento actualizado.
    * @throws NotFoundException si el evento no existe.
    * @throws UnauthorizedException si el usuario no tiene permiso para actualizar el evento.
    */
-  async update(
-    userId: number,
-    id: number,
-    updateEventoDto: UpdateEventoDto,
-    files?: { portada?: Express.Multer.File[]; banner?: Express.Multer.File[] },
-  ) {
+  async update(userId: number, id: number, updateEventoDto: UpdateEventoDto) {
+    if (
+      updateEventoDto.inicioAt &&
+      updateEventoDto.finAt &&
+      updateEventoDto.inicioAt >= updateEventoDto.finAt
+    ) {
+      throw new BadRequestException(
+        'La fecha de inicio debe ser anterior a la fecha de fin',
+      );
+    }
+
     const evento = await this.findOne(id);
     if (!evento) {
       throw new NotFoundException('Evento not found');
@@ -240,23 +267,6 @@ export class EventosService {
     if (updateEventoDto.lugar) {
       const lugar = await this.lugaresService.upsert(updateEventoDto.lugar);
       evento.lugar = lugar;
-    }
-
-    // Procesar archivos de imagen si están presentes
-    if (files?.portada?.[0]) {
-      const portadaUrl = this.fileUploadService.saveImage(
-        files.portada[0],
-        'eventos',
-      );
-      evento.portadaUrl = portadaUrl;
-    }
-
-    if (files?.banner?.[0]) {
-      const bannerUrl = this.fileUploadService.saveImage(
-        files.banner[0],
-        'eventos',
-      );
-      evento.bannerUrl = bannerUrl;
     }
 
     Object.assign(evento, updateEventoDto);

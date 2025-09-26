@@ -1,13 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
   IsBoolean,
   IsDate,
-  IsDefined,
+  IsNotEmpty,
   IsNumber,
+  IsOptional,
+  IsPositive,
   IsString,
-  Min,
+  MaxLength,
+  MinDate,
+  ValidateNested,
 } from 'class-validator';
+import { CreateLugarDto } from 'src/lugares/dto/create-lugar.dto';
+import { CreateEntradaDto } from './create-entrada.dto';
 
 export class CreateEventoDto {
   @ApiProperty({
@@ -15,6 +24,8 @@ export class CreateEventoDto {
     description: 'Nombre del evento',
   })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(200)
   nombre: string;
 
   @ApiProperty({
@@ -22,6 +33,8 @@ export class CreateEventoDto {
     description: 'Descripción del evento',
   })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(1000)
   descripcion: string;
 
   @ApiProperty({
@@ -29,6 +42,9 @@ export class CreateEventoDto {
     description: 'Fecha y hora de inicio del evento (formato ISO 8601)',
   })
   @IsDate()
+  @MinDate(new Date(), {
+    message: 'La fecha de inicio debe ser en el futuro',
+  })
   @Type(() => Date)
   inicioAt: Date;
 
@@ -45,8 +61,9 @@ export class CreateEventoDto {
     description: 'Indica si el evento ha sido cancelado',
   })
   @IsBoolean()
+  @IsOptional()
   @Type(() => Boolean)
-  cancelado: boolean;
+  cancelado: boolean = false;
 
   @ApiProperty({
     example: {
@@ -58,14 +75,9 @@ export class CreateEventoDto {
     },
     description: 'Ubicación del evento',
   })
-  @IsDefined()
-  lugar: {
-    latitud: number;
-    longitud: number;
-    direccion: string;
-    ciudad: string;
-    provincia: string;
-  };
+  @ValidateNested()
+  @Type(() => CreateLugarDto)
+  lugar: CreateLugarDto;
 
   @ApiProperty({
     type: 'array',
@@ -76,16 +88,21 @@ export class CreateEventoDto {
     description:
       'Listado de tipos de entradas con su precio y cantidad disponible',
   })
-  @IsDefined()
-  //@ArrayMinSize(1, { message: 'Debe haber al menos un tipo de entrada' })
-  entradas: { tipo: string; precio: number; cantidad: number }[];
+  @IsArray()
+  @ArrayMinSize(1, { message: 'Debe haber al menos un tipo de entrada' })
+  @ArrayMaxSize(10, { message: 'Máximo 10 tipos de entradas permitidos' })
+  @ValidateNested({ each: true })
+  @Type(() => CreateEntradaDto)
+  entradas: CreateEntradaDto[];
 
   @ApiProperty({
     example: 1,
     description: 'ID de la cuenta bancaria asociada al evento',
   })
-  @IsNumber()
-  @Min(1)
+  @IsNumber({}, { message: 'El ID de cuenta bancaria debe ser un número' })
+  @IsPositive({
+    message: 'El ID de cuenta bancaria debe ser un número positivo',
+  })
   @Type(() => Number)
   cuentaBancariaId: number;
 }
