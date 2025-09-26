@@ -98,14 +98,11 @@ export class EventosService {
     let bannerUrl: string | undefined;
 
     if (files?.portada?.[0]) {
-      portadaUrl = this.fileUploadService.saveImage(
-        files.portada[0],
-        'eventos',
-      );
+      portadaUrl = await this.fileUploadService.saveImage(files.portada[0]);
     }
 
     if (files?.banner?.[0]) {
-      bannerUrl = this.fileUploadService.saveImage(files.banner[0], 'eventos');
+      bannerUrl = await this.fileUploadService.saveImage(files.banner[0]);
     }
 
     Object.assign(evento, { portadaUrl, bannerUrl });

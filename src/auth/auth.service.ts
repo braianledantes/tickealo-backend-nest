@@ -85,10 +85,7 @@ export class AuthService {
 
     // Si hay una imagen, guardarla y agregar la URL
     if (imageFile) {
-      const imageUrl = this.fileUploadService.saveImage(
-        imageFile,
-        'productoras',
-      );
+      const imageUrl = await this.fileUploadService.saveImage(imageFile);
       productoraData.imagenUrl = imageUrl;
     }
 
@@ -133,7 +130,7 @@ export class AuthService {
 
     // Si hay una imagen, guardarla y agregar la URL
     if (imageFile) {
-      const imageUrl = this.fileUploadService.saveImage(imageFile, 'clientes');
+      const imageUrl = await this.fileUploadService.saveImage(imageFile);
       clienteData.imagenPerfilUrl = imageUrl;
     }
 
@@ -174,10 +171,7 @@ export class AuthService {
 
     // Si hay una imagen, guardarla y agregar la URL
     if (imageFile) {
-      const imageUrl = this.fileUploadService.saveImage(
-        imageFile,
-        'validadores',
-      );
+      const imageUrl = await this.fileUploadService.saveImage(imageFile);
       validadorData.imagenPerfilUrl = imageUrl;
     }
 
