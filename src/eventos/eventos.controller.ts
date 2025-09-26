@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,11 +17,11 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
-import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { MultipleImageFileValidationPipe } from 'src/files/pipes/multiple-image-file-validation.pipe';
 import { CreateEventoDto } from './dto/create-evento.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
 import { EventosService } from './eventos.service';
+import { FindEventosDto } from './dto/find-eventos.dto';
 
 @Controller('eventos')
 export class EventosController {
@@ -44,8 +45,8 @@ export class EventosController {
   }
 
   @Get()
-  findAll(@Body() paginationDto: PaginationDto) {
-    return this.eventosService.findAllPaginated(paginationDto);
+  findAll(@Query() findEventosDto: FindEventosDto) {
+    return this.eventosService.findAllPaginated(findEventosDto);
   }
 
   @Get(':id')

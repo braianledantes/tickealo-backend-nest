@@ -8,6 +8,7 @@ import { UpdateLugarDto } from './dto/update-lugar.dto';
 import { Repository } from 'typeorm';
 import { Lugar } from './entities/lugar.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { checkWithinArea } from 'src/utils/filters';
 
 @Injectable()
 export class LugaresService {
@@ -82,22 +83,13 @@ export class LugaresService {
   async findClosePlaces(latitud: number, longitud: number, radius: number) {
     const lugares = await this.lugaresRepository.find();
 
-    const toRad = (value: number) => (value * Math.PI) / 180;
-
     const placesWithinRadius = lugares.filter((lugar) => {
-      const R = 6371; // Radio de la Tierra en km
-      const dLat = toRad(lugar.latitud - latitud);
-      const dLon = toRad(lugar.longitud - longitud);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRad(latitud)) *
-          Math.cos(toRad(lugar.latitud)) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c; // Distancia en km
-
-      return distance <= radius;
+      return checkWithinArea(
+        { latitud: lugar.latitud, longitud: lugar.longitud },
+        latitud,
+        longitud,
+        radius,
+      );
     });
 
     return placesWithinRadius;

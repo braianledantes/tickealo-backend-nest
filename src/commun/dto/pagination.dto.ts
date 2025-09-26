@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsString, Max, Min } from 'class-validator';
+import { IsInt, Max, Min } from 'class-validator';
 
 export class PaginationDto {
   @IsInt()
@@ -12,10 +12,4 @@ export class PaginationDto {
   @Max(100)
   @Type(() => Number)
   limit: number = 10;
-
-  @IsString()
-  search?: string;
-
-  @IsIn(['ASC', 'DESC'])
-  orderDir: 'ASC' | 'DESC' = 'ASC';
 }
