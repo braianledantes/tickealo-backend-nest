@@ -93,6 +93,12 @@ export class EventosService {
       throw new NotFoundException('Evento not found');
     }
 
+    if (evento.productora.userId !== userId) {
+      throw new UnauthorizedException(
+        'You do not have permission to update this evento',
+      );
+    }
+
     // Procesar archivos de imagen si están presentes
     let portadaUrl: string | undefined;
     let bannerUrl: string | undefined;
