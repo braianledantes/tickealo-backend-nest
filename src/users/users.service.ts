@@ -48,6 +48,16 @@ export class UsersService {
   }
 
   /**
+   * Marks a user's email as verified.
+   * @param userId - The ID of the user to verify.
+   */
+  async markEmailAsVerified(userId: number): Promise<void> {
+    await this.usersRepository.update(userId, {
+      emailVerifiedAt: new Date(),
+    });
+  }
+
+  /**
    * Creates a user with the specified role.
    * If the role is 'cliente', only the cliente role is assigned.
    * For 'productora' and 'validador', both the specified role and the cliente role are assigned.
