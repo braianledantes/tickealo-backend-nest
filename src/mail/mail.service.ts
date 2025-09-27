@@ -6,12 +6,23 @@ import * as path from 'node:path';
 
 @Injectable()
 export class MailService {
+  private readonly canSendEmails: boolean;
+
   constructor(
     private readonly mailService: MailerService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.canSendEmails =
+      this.configService.get<boolean>('CAN_SEND_EMAILS', false) === true;
+  }
 
   async sendMail(to: string, subject: string, html: string, text?: string) {
+    if (!this.canSendEmails) {
+      console.warn(
+        `Email sending is disabled. Skipping email to ${to} with subject "${subject}".`,
+      );
+      return;
+    }
     await this.mailService.sendMail({
       to,
       from: this.configService.get<string>('SMTP_FROM'),
