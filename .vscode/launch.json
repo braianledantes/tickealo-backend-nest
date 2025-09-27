@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "node-terminal",
+      "name": "Run: e2e test",
+      "request": "launch",
+      "command": "npm run test:e2e",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node-terminal",
       "name": "Run: start",
       "request": "launch",
       "command": "npm run start",
