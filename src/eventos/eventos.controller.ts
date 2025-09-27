@@ -22,7 +22,9 @@ import { CreateEventoDto } from './dto/create-evento.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
 import { EventosService } from './eventos.service';
 import { FindEventosDto } from './dto/find-eventos.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('eventos')
 export class EventosController {
   constructor(private readonly eventosService: EventosService) {}

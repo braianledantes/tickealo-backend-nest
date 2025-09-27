@@ -16,7 +16,9 @@ import {
 import { CreateLugarDto } from './dto/create-lugar.dto';
 import { UpdateLugarDto } from './dto/update-lugar.dto';
 import { LugaresService } from './lugares.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('lugares')
 export class LugaresController {
   constructor(private readonly lugaresService: LugaresService) {}

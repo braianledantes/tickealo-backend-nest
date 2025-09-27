@@ -5,7 +5,7 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
-import { registerValidadorDto } from './dtos/register-validador.dto';
+import { RegisterValidadorDto } from './dtos/register-validador.dto';
 
 @Injectable()
 export class AuthService {
@@ -149,7 +149,7 @@ export class AuthService {
   }
 
   async registerValidador(
-    registerValidadorDto: registerValidadorDto,
+    registerValidadorDto: RegisterValidadorDto,
     imageFile?: Express.Multer.File,
   ) {
     const { username, email, password } = registerValidadorDto;

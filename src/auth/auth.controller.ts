@@ -17,7 +17,7 @@ import { GetUser } from './decorators/get-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
-import { registerValidadorDto } from './dtos/register-validador.dto';
+import { RegisterValidadorDto } from './dtos/register-validador.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
@@ -63,7 +63,7 @@ export class AuthController {
   @Post('register-validador')
   @UseInterceptors(FileInterceptor('imagenPerfil'))
   registerValidador(
-    @Body() registerValidadorDto: registerValidadorDto,
+    @Body() registerValidadorDto: RegisterValidadorDto,
     @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {

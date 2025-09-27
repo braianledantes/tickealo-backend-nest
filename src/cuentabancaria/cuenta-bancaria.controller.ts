@@ -14,7 +14,9 @@ import { Role } from 'src/auth/enums/role.enum';
 import { CuentaBancariaService } from './cuenta-bancaria.service';
 import { CreateCuentaBancariaDto } from './dto/create-cuenta-bancaria.dto';
 import { UpdateCuentaBancariaDto } from './dto/update-cuenta-bancaria.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Roles(Role.Productora)
 @Controller('cuenta-bancaria')
 export class CuentaBancariaController {
