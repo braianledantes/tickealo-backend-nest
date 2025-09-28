@@ -65,6 +65,23 @@ export class ProductoraService {
   }
 
   /**
+   * Retrieves a productora along with its associated events.
+   * @param idProductora - The ID of the productora.
+   * @returns The productora entity with its events.
+   * @throws BadRequestException if the productora does not exist.
+   */
+  async getEventosProductora(idProductora: number) {
+    const productora = await this.productoraRepository.findOne({
+      where: { userId: idProductora },
+      relations: ['eventos'],
+    });
+    if (!productora) {
+      throw new BadRequestException('La productora no existe');
+    }
+    return productora.eventos;
+  }
+
+  /**
    * Retrieves the team members (validadores) of a specific productora.
    * @param idProductora - The ID of the productora.
    * @returns An array of Validador entities associated with the productora.
