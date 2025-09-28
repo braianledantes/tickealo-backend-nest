@@ -83,4 +83,29 @@ export class UsersService {
     const user = this.usersRepository.create(userData);
     return this.usersRepository.save(user);
   }
+
+  async asignarRolUsuario(userId: number, roleName: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const role = await this.rolesRepository.findOne({
+      where: { name: roleName },
+    });
+    if (!role) {
+      throw new UnprocessableEntityException('Role not found');
+    }
+
+    // Check if the user already has the role
+    if (user.roles.some((r) => r.name === roleName)) {
+      return user; // Role already assigned, return the user as is
+    }
+
+    user.roles.push(role);
+    return this.usersRepository.save(user);
+  }
 }

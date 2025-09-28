@@ -40,4 +40,16 @@ export class ClientesService {
       where: { userId: user.id },
     });
   }
+
+  /**
+   * Finds a cliente by the associated user email.
+   * @param email - The email of the user associated with the cliente.
+   * @returns The cliente entity if found, otherwise throws NotFoundException.
+   * @throws NotFoundException if no cliente is found for the given email.
+   */
+  async findOneByEmail(email: string) {
+    return await this.clientesRepository.findOne({
+      where: { user: { email } },
+    });
+  }
 }

@@ -5,11 +5,13 @@ import { Productora } from './entities/productora.entity';
 import { ProductoraController } from './productora.controller';
 import { ProductoraService } from './productora.service';
 import { UsersModule } from 'src/users/users.module';
+import { ClientesModule } from 'src/clientes/clientes.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Productora]),
     ValidadorModule,
+    ClientesModule,
     UsersModule,
   ],
   controllers: [ProductoraController],

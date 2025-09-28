@@ -297,9 +297,10 @@ export class EventosService {
     await this.eventoRepository.remove(evento);
   }
 
-  /** 
+  /**
    * Devuelve los eventos cuya fecha de inicio es posterior a la fecha actual.
    * Ordenados de más próximos a más lejanos.
+   * @returns Lista de eventos futuros.
    */
   async findUpcoming() {
     const now = new Date();
@@ -309,6 +310,5 @@ export class EventosService {
       relations: ['lugar', 'productora', 'cuentaBancaria'],
       order: { inicioAt: 'ASC' },
     });
-
   }
 }

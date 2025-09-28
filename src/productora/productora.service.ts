@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { Productora } from './entities/productora.entity';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { Role } from 'src/auth/enums/role.enum';
+import { ClientesService } from 'src/clientes/clientes.service';
 
 @Injectable()
 export class ProductoraService {
@@ -12,6 +14,7 @@ export class ProductoraService {
     @InjectRepository(Productora)
     private readonly productoraRepository: Repository<Productora>,
     private readonly validadorService: ValidadorService,
+    private readonly clientesService: ClientesService,
     private readonly usersService: UsersService,
   ) {}
 
@@ -90,7 +93,11 @@ export class ProductoraService {
   async getEquipo(idProductora: number) {
     const productora = await this.productoraRepository.findOne({
       where: { userId: idProductora },
-      relations: ['validadores'],
+      relations: [
+        'validadores',
+        'validadores.cliente',
+        'validadores.cliente.user',
+      ],
     });
     if (!productora) {
       throw new BadRequestException('La productora no existe');
@@ -106,6 +113,7 @@ export class ProductoraService {
    * @throws BadRequestException if the productora does not exist or if the validador is already a team member.
    */
   async addMiembroEquipo(idProductora: number, userEmail: string) {
+    // Buscar la productora por su ID
     const productora = await this.productoraRepository.findOne({
       where: { userId: idProductora },
       relations: ['validadores'],
@@ -113,7 +121,18 @@ export class ProductoraService {
     if (!productora) {
       throw new BadRequestException('La productora no existe');
     }
-    const validador = await this.validadorService.findOneByEmail(userEmail);
+
+    // Buscar el validador por su email y si no existe, crearlo
+    let validador = await this.validadorService.findOneByEmail(userEmail);
+    // Si el validador no existe, crear uno nuevo
+    if (!validador) {
+      validador = await this.validadorService.createValidador(userEmail);
+      // Asignar el rol de validador al usuario
+      await this.usersService.asignarRolUsuario(
+        validador.userId,
+        Role.Validador,
+      );
+    }
 
     // Verificar si el validador ya es miembro del equipo
     const isMember = productora.validadores.some(
@@ -142,6 +161,10 @@ export class ProductoraService {
       throw new BadRequestException('La productora no existe');
     }
     const validador = await this.validadorService.findOneByEmail(userEmail);
+
+    if (!validador) {
+      throw new BadRequestException('El validador no existe');
+    }
 
     // Verificar si el validador es miembro del equipo
     const isMember = productora.validadores.some(

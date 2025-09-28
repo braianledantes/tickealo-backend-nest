@@ -1,43 +1,36 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Validador } from './entities/validador.entity';
+import { ClientesService } from 'src/clientes/clientes.service';
 import { Repository } from 'typeorm';
-import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/entities/user.entity';
+import { Validador } from './entities/validador.entity';
 
 @Injectable()
 export class ValidadorService {
   constructor(
     @InjectRepository(Validador)
     private readonly validadoresRepository: Repository<Validador>,
-    private readonly usersService: UsersService,
+    private readonly clientesService: ClientesService,
   ) {}
 
   /**
-   * Creates a validador user and their associated validador profile.
-   * @param userData - Partial user data including username, email, and password.
-   * @param validadorData - Partial validador data including nombre, estado, and fechaAsignacion.
-   * @returns The created validador profile.
-   * @throws BadRequestException if username or email already exists.
-   * @throws UnprocessableEntityException if the specified role does not exist.
+   * Creates a validador associated with the user identified by the given email.
+   * @param email - The email of the user to associate with the new validador.
+   * @returns The created validador entity.
+   * @throws NotFoundException if no user is found with the given email.
    */
-  async createValidador(
-    userData: Partial<User>,
-    validadorData: Partial<Validador>,
-  ): Promise<Validador> {
-    const user = await this.usersService.createUserWithRole(
-      userData,
-      'validador',
-    );
+  async createValidador(email: string): Promise<Validador> {
+    const cliente = await this.clientesService.findOneByEmail(email);
+    if (!cliente) {
+      throw new NotFoundException('Cliente not found');
+    }
 
-    // Create the validador profile
     const validador = this.validadoresRepository.create({
-      ...validadorData,
-      userId: user.id,
+      userId: cliente.userId,
     });
     await this.validadoresRepository.save(validador);
     return this.validadoresRepository.findOneOrFail({
-      where: { userId: user.id },
+      where: { userId: cliente.userId },
+      relations: ['cliente', 'cliente.user'],
     });
   }
 
@@ -48,12 +41,8 @@ export class ValidadorService {
    * @throws NotFoundException if no validador is found for the given email.
    */
   async findOneByEmail(email: string) {
-    const validador = await this.validadoresRepository.findOne({
-      where: { user: { email } },
+    return await this.validadoresRepository.findOne({
+      where: { cliente: { user: { email } } },
     });
-    if (!validador) {
-      throw new NotFoundException('Validador no encontrado');
-    }
-    return validador;
   }
 }

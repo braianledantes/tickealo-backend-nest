@@ -1,12 +1,11 @@
 import {
-  Column,
   Entity,
   JoinColumn,
   ManyToMany,
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { Cliente } from '../../clientes/entities/cliente.entity';
 import { Productora } from '../../productora/entities/productora.entity';
 
 @Entity()
@@ -14,15 +13,9 @@ export class Validador {
   @PrimaryColumn({ name: 'user_id' })
   userId: number;
 
-  @OneToOne(() => User, { onDelete: 'CASCADE', eager: true })
+  @OneToOne(() => Cliente, { onDelete: 'CASCADE', eager: true })
   @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column()
-  nombre: string;
-
-  @Column({ name: 'imagen_perfil_url', nullable: true, type: 'varchar' })
-  imagenPerfilUrl: string | null;
+  cliente: Cliente;
 
   @ManyToMany(() => Productora, (productora) => productora.validadores)
   productoras: Productora[];
