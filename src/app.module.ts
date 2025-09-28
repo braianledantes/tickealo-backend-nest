@@ -11,6 +11,7 @@ import { LugaresModule } from './lugares/lugares.module';
 import { EventosModule } from './eventos/eventos.module';
 import { ProductoraModule } from './productora/productora.module';
 import { ValidadorModule } from './validador/validador.module';
+import { ClientesModule } from './clientes/clientes.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ValidadorModule } from './validador/validador.module';
     EventosModule,
     ProductoraModule,
     ValidadorModule,
+    ClientesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

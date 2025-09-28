@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ValidadorService } from 'src/validador/validador.service';
 import { Repository } from 'typeorm';
 import { Productora } from './entities/productora.entity';
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ProductoraService {
@@ -10,7 +12,57 @@ export class ProductoraService {
     @InjectRepository(Productora)
     private readonly productoraRepository: Repository<Productora>,
     private readonly validadorService: ValidadorService,
+    private readonly usersService: UsersService,
   ) {}
+
+  /**
+   * Creates a productora user and their associated productora profile.
+   * @param userData - Partial user data including username, email, and password.
+   * @param productoraData - Partial productora data including cuit, nombre, direccion, and telefono.
+   * @returns The created productora profile.
+   * @throws BadRequestException if username, email, or CUIT already exists.
+   * @throws UnprocessableEntityException if the specified role does not exist.
+   */
+  async createProductora(
+    userData: Partial<User>,
+    productoraData: Partial<Productora>,
+  ): Promise<Productora | null> {
+    // Check that CUIT is unique
+    const existingProductora = await this.productoraRepository.findOne({
+      where: { cuit: productoraData.cuit },
+    });
+    if (existingProductora) {
+      throw new BadRequestException('CUIT already exists');
+    }
+
+    // Create the user with the productora role
+    const user = await this.usersService.createUserWithRole(
+      userData,
+      'productora',
+    );
+
+    // Create the productora profile
+    const productora = this.productoraRepository.create({
+      ...productoraData,
+      userId: user.id,
+    });
+    await this.productoraRepository.save(productora);
+    return this.productoraRepository.findOneOrFail({
+      where: { userId: user.id },
+    });
+  }
+
+  /**
+   * Finds a productora by the associated user ID.
+   * @param userId - The ID of the user associated with the productora.
+   * @returns The productora entity if found, otherwise null.
+   */
+  async findOneByUserId(userId: number) {
+    return this.productoraRepository.findOne({
+      where: { userId },
+      relations: ['equipo', 'cuentaBancaria', 'eventos'],
+    });
+  }
 
   /**
    * Retrieves the team members (validadores) of a specific productora.

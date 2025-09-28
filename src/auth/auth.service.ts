@@ -13,11 +13,17 @@ import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { RegisterValidadorDto } from './dtos/register-validador.dto';
 import { EmailVerificationPayload } from './interfaces/email-verification-payload.interface';
+import { ProductoraService } from 'src/productora/productora.service';
+import { ValidadorService } from 'src/validador/validador.service';
+import { ClientesService } from 'src/clientes/clientes.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly productoraService: ProductoraService,
+    private readonly validadorService: ValidadorService,
+    private readonly clientesService: ClientesService,
     private readonly jwtService: JwtService,
     private readonly fileUploadService: FileUploadService,
     private readonly mailService: MailService,
@@ -172,7 +178,7 @@ export class AuthService {
     }
 
     // Crear la productora con su usuario
-    const productora = await this.usersService.createProductora(
+    const productora = await this.productoraService.createProductora(
       userData,
       productoraData,
     );
@@ -224,7 +230,7 @@ export class AuthService {
     }
 
     // Crear el cliente con su usuario
-    const cliente = await this.usersService.createCliente(
+    const cliente = await this.clientesService.createCliente(
       userData,
       clienteData,
     );
@@ -272,7 +278,7 @@ export class AuthService {
     }
 
     // Crear el validador con su usuario
-    const validador = await this.usersService.createValidador(
+    const validador = await this.validadorService.createValidador(
       userData,
       validadorData,
     );

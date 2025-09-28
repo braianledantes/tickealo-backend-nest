@@ -11,10 +11,16 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { FilesModule } from 'src/files/files.module';
 import { MailModule } from 'src/mail/mail.module';
+import { ProductoraModule } from 'src/productora/productora.module';
+import { ValidadorModule } from 'src/validador/validador.module';
+import { ClientesModule } from 'src/clientes/clientes.module';
 
 @Module({
   imports: [
     UsersModule,
+    ProductoraModule,
+    ValidadorModule,
+    ClientesModule,
     FilesModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

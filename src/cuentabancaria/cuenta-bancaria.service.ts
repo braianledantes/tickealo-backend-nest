@@ -8,14 +8,14 @@ import { Repository } from 'typeorm';
 import { CreateCuentaBancariaDto } from './dto/create-cuenta-bancaria.dto';
 import { UpdateCuentaBancariaDto } from './dto/update-cuenta-bancaria.dto';
 import { CuentaBancaria } from './entities/cuenta-bancaria.entity';
-import { UsersService } from 'src/users/users.service';
+import { ProductoraService } from 'src/productora/productora.service';
 
 @Injectable()
 export class CuentaBancariaService {
   constructor(
     @InjectRepository(CuentaBancaria)
     private readonly cuentaBancariaRepository: Repository<CuentaBancaria>,
-    private readonly usersService: UsersService,
+    private readonly productoraService: ProductoraService,
   ) {}
 
   /**
@@ -29,7 +29,7 @@ export class CuentaBancariaService {
     userId: number,
     createCuentaBancariaDto: CreateCuentaBancariaDto,
   ) {
-    const productora = await this.usersService.findProductoraByUserId(userId);
+    const productora = await this.productoraService.findOneByUserId(userId);
     if (!productora) {
       throw new NotFoundException('Productora not found');
     }

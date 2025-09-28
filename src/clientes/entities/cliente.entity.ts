@@ -1,5 +1,5 @@
+import { User } from '../../users/entities/user.entity';
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
-import { User } from './user.entity';
 
 @Entity()
 export class Cliente {

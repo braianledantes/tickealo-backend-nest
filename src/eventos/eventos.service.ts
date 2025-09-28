@@ -4,24 +4,24 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateEventoDto } from './dto/create-evento.dto';
-import { UpdateEventoDto } from './dto/update-evento.dto';
-import { UsersService } from 'src/users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Evento } from './entities/evento.entity';
-import { ILike, Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { CuentaBancariaService } from 'src/cuentabancaria/cuenta-bancaria.service';
-import { LugaresService } from 'src/lugares/lugares.service';
 import { FileUploadService } from 'src/files/file-upload.service';
-import { FindEventosDto } from './dto/find-eventos.dto';
+import { LugaresService } from 'src/lugares/lugares.service';
+import { ProductoraService } from 'src/productora/productora.service';
 import { checkWithinArea } from 'src/utils/filters';
+import { ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { CreateEventoDto } from './dto/create-evento.dto';
+import { FindEventosDto } from './dto/find-eventos.dto';
+import { UpdateEventoDto } from './dto/update-evento.dto';
+import { Evento } from './entities/evento.entity';
 
 @Injectable()
 export class EventosService {
   constructor(
     @InjectRepository(Evento)
     private readonly eventoRepository: Repository<Evento>,
-    private readonly userService: UsersService,
+    private readonly productoraService: ProductoraService,
     private readonly cuentaBancariaService: CuentaBancariaService,
     private readonly lugaresService: LugaresService,
     private readonly fileUploadService: FileUploadService,
@@ -41,7 +41,7 @@ export class EventosService {
       );
     }
 
-    const productora = await this.userService.findProductoraByUserId(userId);
+    const productora = await this.productoraService.findOneByUserId(userId);
     const cuentaBancaria = await this.cuentaBancariaService.findById(
       createEventoDto.cuentaBancariaId,
     );
@@ -82,7 +82,7 @@ export class EventosService {
       banner?: Express.Multer.File[];
     },
   ) {
-    const productora = await this.userService.findProductoraByUserId(userId);
+    const productora = await this.productoraService.findOneByUserId(userId);
 
     if (!productora) {
       throw new UnauthorizedException('Productora not found');
