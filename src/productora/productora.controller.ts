@@ -17,6 +17,12 @@ import { ProductoraService } from './productora.service';
 export class ProductoraController {
   constructor(private readonly productoraService: ProductoraService) {}
 
+  @Roles(Role.Productora)
+  @Get('eventos')
+  getAllEventos(@GetUser('id') idProductora: number) {
+    return this.productoraService.getEventosProductora(idProductora);
+  }
+
   @Get(':id/eventos')
   getEventos(@Param('id', ParseIntPipe) idProductora: number) {
     return this.productoraService.getEventosProductora(idProductora);
