@@ -60,7 +60,7 @@ export class ProductoraService {
   async findOneByUserId(userId: number) {
     return this.productoraRepository.findOne({
       where: { userId },
-      relations: ['equipo', 'cuentaBancaria', 'eventos'],
+      relations: ['validadores', 'cuentaBancaria', 'eventos'],
     });
   }
 
@@ -73,7 +73,7 @@ export class ProductoraService {
   async getEquipo(idProductora: number) {
     const productora = await this.productoraRepository.findOne({
       where: { userId: idProductora },
-      relations: ['equipo'],
+      relations: ['validadores'],
     });
     if (!productora) {
       throw new BadRequestException('La productora no existe');
@@ -91,7 +91,7 @@ export class ProductoraService {
   async addMiembroEquipo(idProductora: number, userEmail: string) {
     const productora = await this.productoraRepository.findOne({
       where: { userId: idProductora },
-      relations: ['equipo'],
+      relations: ['validadores'],
     });
     if (!productora) {
       throw new BadRequestException('La productora no existe');
@@ -119,7 +119,7 @@ export class ProductoraService {
   async removeMiembroEquipo(idProductora: number, userEmail: string) {
     const productora = await this.productoraRepository.findOne({
       where: { userId: idProductora },
-      relations: ['equipo'],
+      relations: ['validadores'],
     });
     if (!productora) {
       throw new BadRequestException('La productora no existe');
