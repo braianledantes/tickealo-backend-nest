@@ -1,14 +1,19 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { MailEntity } from './entities/mail.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MailService {
   private readonly canSendEmails: boolean;
 
   constructor(
+    @InjectRepository(MailEntity)
+    private readonly mailRepository: Repository<MailEntity>,
     private readonly mailService: MailerService,
     private readonly configService: ConfigService,
   ) {
@@ -16,20 +21,48 @@ export class MailService {
       this.configService.get<boolean>('CAN_SEND_EMAILS', false) === true;
   }
 
+  /**
+   * Sends an email and logs the status in the database.
+   * @param to - Recipient email address.
+   * @param subject - Subject of the email.
+   * @param html - HTML content of the email.
+   * @param text - Plain text content of the email (optional).
+   */
   async sendMail(to: string, subject: string, html: string, text?: string) {
-    if (!this.canSendEmails) {
-      console.warn(
-        `Email sending is disabled. Skipping email to ${to} with subject "${subject}".`,
-      );
-      return;
-    }
-    await this.mailService.sendMail({
+    const mailRecord = this.mailRepository.create({
       to,
       from: this.configService.get<string>('SMTP_FROM'),
       subject,
       html,
       text,
+      status: 'pending',
     });
+    const mail = await this.mailRepository.save(mailRecord);
+    try {
+      // If email sending is disabled, skip sending but log the attempt
+      if (!this.canSendEmails) {
+        console.warn(
+          `Email sending is disabled. Skipping email to ${to} with subject "${subject}".`,
+        );
+        return;
+      }
+      // Send the email
+      await this.mailService.sendMail({
+        to,
+        from: this.configService.get<string>('SMTP_FROM'),
+        subject,
+        html,
+        text,
+      });
+    } catch (error) {
+      mail.status = 'failed';
+      mail.errorMessage = (error as Error).message;
+    } finally {
+      if (mail.status !== 'failed') {
+        mail.status = 'sent';
+      }
+      await this.mailRepository.save(mail);
+    }
   }
 
   async sendVerificationEmail(to: string, code: string) {
