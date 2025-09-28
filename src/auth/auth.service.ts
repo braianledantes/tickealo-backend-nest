@@ -86,7 +86,7 @@ export class AuthService {
    * @param token - The JWT token to verify.
    * @returns The decoded payload if valid.
    */
-  async verifyEmailVerificationToken(
+  private async verifyEmailVerificationToken(
     token: string,
   ): Promise<EmailVerificationPayload> {
     try {
