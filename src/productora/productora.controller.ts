@@ -1,9 +1,11 @@
 import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { ProductoraService } from './productora.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
-import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { ProductoraService } from './productora.service';
 
+@ApiBearerAuth()
 @Roles(Role.Productora)
 @Controller('productora')
 export class ProductoraController {
