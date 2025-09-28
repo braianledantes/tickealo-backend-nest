@@ -5,24 +5,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ClientesService } from 'src/clientes/clientes.service';
 import { FileUploadService } from 'src/files/file-upload.service';
 import { MailService } from 'src/mail/mail.service';
+import { ProductoraService } from 'src/productora/productora.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
-import { RegisterValidadorDto } from './dtos/register-validador.dto';
 import { EmailVerificationPayload } from './interfaces/email-verification-payload.interface';
-import { ProductoraService } from 'src/productora/productora.service';
-import { ValidadorService } from 'src/validador/validador.service';
-import { ClientesService } from 'src/clientes/clientes.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly productoraService: ProductoraService,
-    private readonly validadorService: ValidadorService,
     private readonly clientesService: ClientesService,
     private readonly jwtService: JwtService,
     private readonly fileUploadService: FileUploadService,
@@ -248,53 +245,5 @@ export class AuthService {
 
     // Generar token de acceso para el cliente recién registrado
     return await this.generateAccessToken(cliente.user);
-  }
-
-  async registerValidador(
-    registerValidadorDto: RegisterValidadorDto,
-    imageFile?: Express.Multer.File,
-  ) {
-    const { username, email, password } = registerValidadorDto;
-
-    // Datos del usuario base
-    const userData = {
-      username,
-      email,
-      password,
-    };
-
-    // Datos específicos del validador
-    const validadorData: {
-      nombre: string;
-      imagenPerfilUrl?: string;
-    } = {
-      nombre: registerValidadorDto.nombre,
-    };
-
-    // Si hay una imagen, guardarla y agregar la URL
-    if (imageFile) {
-      const imageUrl = await this.fileUploadService.saveImage(imageFile);
-      validadorData.imagenPerfilUrl = imageUrl;
-    }
-
-    // Crear el validador con su usuario
-    const validador = await this.validadorService.createValidador(
-      userData,
-      validadorData,
-    );
-
-    if (!validador) {
-      throw new InternalServerErrorException('Failed to create validador');
-    }
-
-    // Enviar email de verificación
-    await this.sendEmailVerification(validador.user);
-
-    if (!validador) {
-      throw new InternalServerErrorException('Error creating validador');
-    }
-
-    // Generar token de acceso para el validador recién registrado
-    return await this.generateAccessToken(validador.user);
   }
 }

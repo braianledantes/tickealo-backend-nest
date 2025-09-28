@@ -1,25 +1,23 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { UsersModule } from 'src/users/users.module';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { LocalStrategy } from './strategies/local.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { AuthController } from './auth.controller';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from './guards/roles.guard';
+import { JwtModule } from '@nestjs/jwt';
+import { ClientesModule } from 'src/clientes/clientes.module';
 import { FilesModule } from 'src/files/files.module';
 import { MailModule } from 'src/mail/mail.module';
 import { ProductoraModule } from 'src/productora/productora.module';
-import { ValidadorModule } from 'src/validador/validador.module';
-import { ClientesModule } from 'src/clientes/clientes.module';
+import { UsersModule } from 'src/users/users.module';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
     UsersModule,
     ProductoraModule,
-    ValidadorModule,
     ClientesModule,
     FilesModule,
     JwtModule.registerAsync({
