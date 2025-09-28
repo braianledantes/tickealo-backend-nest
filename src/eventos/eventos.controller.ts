@@ -38,6 +38,12 @@ export class EventosController {
     return this.eventosService.create(userId, createEventoDto);
   }
 
+  //NUEVO ENDPOINT: /eventos/proximos
+  @Get('proximos')
+  findUpcoming() {
+    return this.eventosService.findUpcoming();
+  }
+
   @Roles(Role.Productora)
   @Patch(':id/imagenes')
   @UseInterceptors(
