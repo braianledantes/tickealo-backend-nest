@@ -9,6 +9,8 @@ import { MailModule } from './mail/mail.module';
 import { CuentaBancariaModule } from './cuentabancaria/cuenta-bancaria.module';
 import { LugaresModule } from './lugares/lugares.module';
 import { EventosModule } from './eventos/eventos.module';
+import { ProductoraModule } from './productora/productora.module';
+import { ValidadorModule } from './validador/validador.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { EventosModule } from './eventos/eventos.module';
     CuentaBancariaModule,
     LugaresModule,
     EventosModule,
+    ProductoraModule,
+    ValidadorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -38,6 +38,7 @@ export class EventosController {
     return this.eventosService.create(userId, createEventoDto);
   }
 
+  @Roles(Role.Productora)
   @Patch(':id/imagenes')
   @UseInterceptors(
     FileFieldsInterceptor([

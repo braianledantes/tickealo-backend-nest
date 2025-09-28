@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Productora } from '../../users/entities/productora.entity';
+import { Productora } from '../../productora/entities/productora.entity';
 
 @Entity({ name: 'cuenta_bancaria' })
 export class CuentaBancaria {

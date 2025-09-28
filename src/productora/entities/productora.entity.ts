@@ -3,12 +3,15 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../users/entities/user.entity';
 import { Evento } from '../../eventos/entities/evento.entity';
+import { Validador } from '../../validador/entities/validador.entity';
 
 @Entity()
 export class Productora {
@@ -45,4 +48,12 @@ export class Productora {
 
   @OneToMany(() => Evento, (evento) => evento.productora)
   eventos: Evento[];
+
+  @ManyToMany(() => Validador, (validador) => validador.productoras)
+  @JoinTable({
+    name: 'productoras_validadores',
+    joinColumn: { name: 'productora_id', referencedColumnName: 'userId' },
+    inverseJoinColumn: { name: 'validador_id', referencedColumnName: 'userId' },
+  })
+  validadores: Validador[];
 }

@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Lugar } from '../../lugares/entities/lugar.entity';
 import { Entrada } from './entrada.entity';
-import { Productora } from '../../users/entities/productora.entity';
+import { Productora } from '../../productora/entities/productora.entity';
 import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
 
 @Entity()

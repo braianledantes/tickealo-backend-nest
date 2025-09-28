@@ -1,5 +1,13 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
-import { User } from './user.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Productora } from '../../productora/entities/productora.entity';
 
 @Entity()
 export class Validador {
@@ -15,4 +23,7 @@ export class Validador {
 
   @Column({ name: 'imagen_perfil_url', nullable: true, type: 'varchar' })
   imagenPerfilUrl: string | null;
+
+  @ManyToMany(() => Productora, (productora) => productora.validadores)
+  productoras: Productora[];
 }
