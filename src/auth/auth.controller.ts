@@ -19,6 +19,7 @@ import { Public } from './decorators/public.decorator';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -32,6 +33,7 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @ApiBearerAuth()
   @Get('me')
   getProfile(@GetUser('id') userId: number) {
     return this.authService.getProfile(userId);
