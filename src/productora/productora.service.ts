@@ -56,6 +56,18 @@ export class ProductoraService {
   }
 
   /**
+   * Gets the profile of the authenticated productora.
+   * @param userId - The ID of the authenticated user.
+   * @returns The profile of the productora or null if not found.
+   */
+  async getProfile(userId: number): Promise<Productora | null> {
+    return this.productoraRepository.findOne({
+      where: { userId },
+      relations: ['cuentaBancaria'],
+    });
+  }
+
+  /**
    * Finds a productora by the associated user ID.
    * @param userId - The ID of the user associated with the productora.
    * @returns The productora entity if found, otherwise null.

@@ -33,8 +33,8 @@ export class AuthController {
   }
 
   @Get('me')
-  getProfile(@GetUser() user: User) {
-    return user;
+  getProfile(@GetUser('id') userId: number) {
+    return this.authService.getProfile(userId);
   }
 
   @Public()

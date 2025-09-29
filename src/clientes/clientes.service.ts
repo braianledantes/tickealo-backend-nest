@@ -42,6 +42,17 @@ export class ClientesService {
   }
 
   /**
+   * Gets the profile of the authenticated cliente.
+   * @param userId - The ID of the authenticated user.
+   * @returns The profile of the cliente or null if not found.
+   */
+  async getProfile(userId: number): Promise<Cliente | null> {
+    return this.clientesRepository.findOne({
+      where: { userId },
+    });
+  }
+
+  /**
    * Finds a cliente by the associated user email.
    * @param email - The email of the user associated with the cliente.
    * @returns The cliente entity if found, otherwise throws NotFoundException.

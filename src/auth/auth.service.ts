@@ -14,6 +14,8 @@ import { UsersService } from 'src/users/users.service';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { EmailVerificationPayload } from './interfaces/email-verification-payload.interface';
+import { Productora } from 'src/productora/entities/productora.entity';
+import { Cliente } from 'src/clientes/entities/cliente.entity';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +27,24 @@ export class AuthService {
     private readonly fileUploadService: FileUploadService,
     private readonly mailService: MailService,
   ) {}
+
+  /**
+   * Gets the profile of the authenticated user, whether they are a productora or cliente.
+   * @param userId - The ID of the authenticated user.
+   * @returns The profile of the user, either as a Productora or Cliente.
+   * @throws NotFoundException if no profile is found for the user.
+   */
+  async getProfile(userId: number): Promise<Productora | Cliente> {
+    const productora = await this.productoraService.getProfile(userId);
+    if (!productora) {
+      const cliente = await this.clientesService.getProfile(userId);
+      if (!cliente) {
+        throw new NotFoundException('Profile not found');
+      }
+      return cliente;
+    }
+    return productora;
+  }
 
   /**
    * Validates a user by their email and password.
