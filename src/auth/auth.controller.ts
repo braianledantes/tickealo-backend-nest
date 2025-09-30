@@ -33,6 +33,22 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(LocalAuthGuard)
+  @Post('login-productora')
+  async loginProductora(@GetUser() user: User) {
+    return this.authService.loginProductora(user);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(LocalAuthGuard)
+  @Post('login-cliente')
+  async loginCliente(@GetUser() user: User) {
+    return this.authService.loginCliente(user);
+  }
+
   @ApiBearerAuth()
   @Get('me')
   getProfile(@GetUser('id') userId: number) {

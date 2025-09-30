@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientesService } from 'src/clientes/clientes.service';
@@ -14,8 +15,6 @@ import { UsersService } from 'src/users/users.service';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { EmailVerificationPayload } from './interfaces/email-verification-payload.interface';
-import { Productora } from 'src/productora/entities/productora.entity';
-import { Cliente } from 'src/clientes/entities/cliente.entity';
 
 @Injectable()
 export class AuthService {
@@ -75,6 +74,34 @@ export class AuthService {
    * @returns An object containing the access token.
    */
   async login(user: User) {
+    return this.generateAccessToken(user);
+  }
+
+  /**
+   * Generates a JWT for the given productora user after verifying their profile exists.
+   * @param user - The productora user to generate a JWT for.
+   * @returns An object containing the access token.
+   * @throws UnauthorizedException if the productora profile does not exist.
+   */
+  async loginProductora(user: User) {
+    const productora = await this.productoraService.getProfile(user.id);
+    if (!productora) {
+      throw new UnauthorizedException('Productora profile not found');
+    }
+    return this.generateAccessToken(user);
+  }
+
+  /**
+   * Generates a JWT for the given cliente user after verifying their profile exists.
+   * @param user - The cliente user to generate a JWT for.
+   * @returns An object containing the access token.
+   * @throws UnauthorizedException if the cliente profile does not exist.
+   */
+  async loginCliente(user: User) {
+    const cliente = await this.clientesService.getProfile(user.id);
+    if (!cliente) {
+      throw new UnauthorizedException('Cliente profile not found');
+    }
     return this.generateAccessToken(user);
   }
 
