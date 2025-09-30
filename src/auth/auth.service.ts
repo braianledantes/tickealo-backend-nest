@@ -34,16 +34,22 @@ export class AuthService {
    * @returns The profile of the user, either as a Productora or Cliente.
    * @throws NotFoundException if no profile is found for the user.
    */
-  async getProfile(userId: number): Promise<Productora | Cliente> {
+  async getProfile(userId: number) {
     const productora = await this.productoraService.getProfile(userId);
     if (!productora) {
       const cliente = await this.clientesService.getProfile(userId);
       if (!cliente) {
         throw new NotFoundException('Profile not found');
       }
-      return cliente;
+      return {
+        userType: 'cliente',
+        ...cliente,
+      };
     }
-    return productora;
+    return {
+      userType: 'productora',
+      ...productora,
+    };
   }
 
   /**
