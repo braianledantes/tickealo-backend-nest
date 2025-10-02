@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -20,6 +21,8 @@ import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { UpdateProductoraDto } from './dtos/update-productora.dto';
+import { UpdateClienteDto } from './dtos/update-cliente.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -53,6 +56,30 @@ export class AuthController {
   @Get('me')
   getProfile(@GetUser('id') userId: number) {
     return this.authService.getProfile(userId);
+  }
+
+  @ApiBearerAuth()
+  @Patch('productora-perfil')
+  @UseInterceptors(FileInterceptor('imagenPerfil'))
+  updeteProductoraProfile(
+    @GetUser('id') userId: number,
+    @Body() updateData: UpdateProductoraDto,
+    @UploadedFile(new ImageFileValidationPipe())
+    file?: Express.Multer.File,
+  ) {
+    return this.authService.updateProductora(userId, updateData, file);
+  }
+
+  @ApiBearerAuth()
+  @Patch('cliente-perfil')
+  @UseInterceptors(FileInterceptor('imagenPerfil'))
+  updateClienteProfile(
+    @GetUser('id') userId: number,
+    @Body() updateData: UpdateClienteDto,
+    @UploadedFile(new ImageFileValidationPipe())
+    file?: Express.Multer.File,
+  ) {
+    return this.authService.updateCliente(userId, updateData, file);
   }
 
   @Public()

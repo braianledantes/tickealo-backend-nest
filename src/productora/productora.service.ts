@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ValidadorService } from 'src/validador/validador.service';
 import { Repository } from 'typeorm';
@@ -53,6 +57,47 @@ export class ProductoraService {
     return this.productoraRepository.findOneOrFail({
       where: { userId: user.id },
     });
+  }
+
+  /**
+   * Updates the productora profile for the authenticated user.
+   * @param userId - The ID of the authenticated user.
+   * @param updateData - Partial productora data to update.
+   * @returns The updated productora profile.
+   * @throws BadRequestException if the productora does not exist or if CUIT already exists.
+   */
+  async updateProductora(
+    userId: number,
+    updateData: Partial<Productora>,
+  ): Promise<Productora> {
+    const productora = await this.productoraRepository.findOne({
+      where: { userId },
+    });
+    if (!productora) {
+      throw new BadRequestException('La productora no existe');
+    }
+
+    // If CUIT is being updated, check for uniqueness
+    if (updateData.cuit && updateData.cuit !== productora.cuit) {
+      const existingProductora = await this.productoraRepository.findOne({
+        where: { cuit: updateData.cuit },
+      });
+      if (existingProductora) {
+        throw new BadRequestException('CUIT already exists');
+      }
+    }
+
+    Object.assign(productora, updateData);
+    await this.productoraRepository.save(productora);
+    const productoraSaved = await this.productoraRepository.findOne({
+      where: { userId },
+    });
+    if (!productoraSaved) {
+      throw new InternalServerErrorException(
+        'Error al actualizar la productora',
+      );
+    }
+    return productoraSaved;
   }
 
   /**

@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cliente } from './entities/cliente.entity';
 import { Repository } from 'typeorm';
@@ -39,6 +43,27 @@ export class ClientesService {
     return this.clientesRepository.findOneOrFail({
       where: { userId: user.id },
     });
+  }
+
+  async updateCliente(
+    userId: number,
+    clienteData: Partial<Cliente>,
+  ): Promise<Cliente> {
+    const cliente = await this.clientesRepository.findOne({
+      where: { userId },
+    });
+    if (!cliente) {
+      throw new BadRequestException('Cliente not found');
+    }
+    Object.assign(cliente, clienteData);
+    await this.clientesRepository.save(cliente);
+    const clienteSaved = await this.clientesRepository.findOne({
+      where: { userId },
+    });
+    if (!clienteSaved) {
+      throw new InternalServerErrorException('Error updating cliente');
+    }
+    return clienteSaved;
   }
 
   /**

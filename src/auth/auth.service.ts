@@ -15,6 +15,8 @@ import { UsersService } from 'src/users/users.service';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
 import { EmailVerificationPayload } from './interfaces/email-verification-payload.interface';
+import { UpdateProductoraDto } from './dtos/update-productora.dto';
+import { UpdateClienteDto } from './dtos/update-cliente.dto';
 
 @Injectable()
 export class AuthService {
@@ -132,6 +134,85 @@ export class AuthService {
 
     // Token expires in 24 hours
     return this.jwtService.signAsync(payload, { expiresIn: '24h' });
+  }
+
+  /**
+   * Updates the productora profile for the given user ID.
+   * @param id - The ID of the user whose productora profile is to be updated.
+   * @param updateProductoraDto - The data to update the productora profile with.
+   * @returns The updated productora profile.
+   * @throws BadRequestException if the productora does not exist.
+   */
+  async updateProductora(
+    id: number,
+    updateProductoraDto: UpdateProductoraDto,
+    imageFile?: Express.Multer.File,
+  ) {
+    const { cuit, nombre, direccion, telefono } = updateProductoraDto;
+
+    // Preparar datos específicos de la productora
+    const productoraData: {
+      cuit?: string;
+      nombre?: string;
+      direccion?: string;
+      telefono?: string;
+      imagenUrl?: string;
+    } = {};
+
+    // Solo agregar campos que están definidos en el DTO
+    if (cuit !== undefined) productoraData.cuit = cuit;
+    if (nombre !== undefined) productoraData.nombre = nombre;
+    if (direccion !== undefined) productoraData.direccion = direccion;
+    if (telefono !== undefined) productoraData.telefono = telefono;
+
+    // Si hay una imagen, guardarla y agregar la URL
+    if (imageFile) {
+      const imageUrl = await this.fileUploadService.saveImage(imageFile);
+      productoraData.imagenUrl = imageUrl;
+    }
+
+    // Actualizar la productora usando el servicio
+    const updatedProductora = await this.productoraService.updateProductora(
+      id,
+      productoraData,
+    );
+
+    return updatedProductora;
+  }
+
+  async updateCliente(
+    id: number,
+    updateClienteDto: UpdateClienteDto,
+    imageFile?: Express.Multer.File,
+  ) {
+    const { nombre, apellido, telefono } = updateClienteDto;
+
+    // Preparar datos específicos del cliente
+    const clienteData: {
+      nombre?: string;
+      apellido?: string;
+      telefono?: string;
+      imagenPerfilUrl?: string;
+    } = {};
+
+    // Solo agregar campos que están definidos en el DTO
+    if (nombre !== undefined) clienteData.nombre = nombre;
+    if (apellido !== undefined) clienteData.apellido = apellido;
+    if (telefono !== undefined) clienteData.telefono = telefono;
+
+    // Si hay una imagen, guardarla y agregar la URL
+    if (imageFile) {
+      const imageUrl = await this.fileUploadService.saveImage(imageFile);
+      clienteData.imagenPerfilUrl = imageUrl;
+    }
+
+    // Actualizar el cliente usando el servicio
+    const updatedCliente = await this.clientesService.updateCliente(
+      id,
+      clienteData,
+    );
+
+    return updatedCliente;
   }
 
   /**
