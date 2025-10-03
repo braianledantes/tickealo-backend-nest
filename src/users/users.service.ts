@@ -118,15 +118,38 @@ export class UsersService {
    * @throws UnprocessableEntityException if there is an error updating the user.
    */
   async updateUser(userId: number, userData: Partial<User>): Promise<User> {
+    // Check if username or email already exists
+    if (userData.username) {
+      const existingUser = await this.usersRepository.findOne({
+        where: { username: userData.username },
+      });
+      if (existingUser && existingUser.id !== userId) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
+    if (userData.email) {
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: userData.email },
+      });
+      if (existingUser && existingUser.id !== userId) {
+        throw new BadRequestException('Email already exists');
+      }
+    }
+
+    // Check if the user exists
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('User not found');
     }
+
+    // Update the user
     Object.assign(user, userData);
     await this.usersRepository.save(user);
     const userSaved = await this.usersRepository.findOne({
       where: { id: userId },
     });
+
+    // Verify the user was updated
     if (!userSaved) {
       throw new UnprocessableEntityException('Error updating user');
     }
