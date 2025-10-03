@@ -68,8 +68,12 @@ export class ProductoraService {
    */
   async updateProductora(
     userId: number,
+    userData: Partial<User>,
     updateData: Partial<Productora>,
   ): Promise<Productora> {
+    // First, update the user data
+    await this.usersService.updateUser(userId, userData);
+
     const productora = await this.productoraRepository.findOne({
       where: { userId },
     });

@@ -151,11 +151,14 @@ export class AuthService {
     const { username, email, password, cuit, nombre, direccion, telefono } =
       updateProductoraDto;
 
-    // Preparar datos específicos de la productora
-    const productoraData: {
+    const userData: {
       username?: string;
       email?: string;
       password?: string;
+    } = {};
+
+    // Preparar datos específicos de la productora
+    const productoraData: {
       cuit?: string;
       nombre?: string;
       direccion?: string;
@@ -164,9 +167,10 @@ export class AuthService {
     } = {};
 
     // Solo agregar campos que están definidos en el DTO
-    if (username !== undefined) productoraData.username = username;
-    if (email !== undefined) productoraData.email = email;
-    if (password !== undefined) productoraData.password = password;
+    if (username !== undefined) userData.username = username;
+    if (email !== undefined) userData.email = email;
+    if (password !== undefined) userData.password = password;
+
     if (cuit !== undefined) productoraData.cuit = cuit;
     if (nombre !== undefined) productoraData.nombre = nombre;
     if (direccion !== undefined) productoraData.direccion = direccion;
@@ -181,6 +185,7 @@ export class AuthService {
     // Actualizar la productora usando el servicio
     const updatedProductora = await this.productoraService.updateProductora(
       id,
+      userData,
       productoraData,
     );
 
@@ -195,11 +200,14 @@ export class AuthService {
     const { username, email, password, nombre, apellido, telefono } =
       updateClienteDto;
 
-    // Preparar datos específicos del cliente
-    const clienteData: {
+    const userData: {
       username?: string;
       email?: string;
       password?: string;
+    } = {};
+
+    // Preparar datos específicos del cliente
+    const clienteData: {
       nombre?: string;
       apellido?: string;
       telefono?: string;
@@ -207,9 +215,10 @@ export class AuthService {
     } = {};
 
     // Solo agregar campos que están definidos en el DTO
-    if (username !== undefined) clienteData.username = username;
-    if (email !== undefined) clienteData.email = email;
-    if (password !== undefined) clienteData.password = password;
+    if (username !== undefined) userData.username = username;
+    if (email !== undefined) userData.email = email;
+    if (password !== undefined) userData.password = password;
+
     if (nombre !== undefined) clienteData.nombre = nombre;
     if (apellido !== undefined) clienteData.apellido = apellido;
     if (telefono !== undefined) clienteData.telefono = telefono;
@@ -223,6 +232,7 @@ export class AuthService {
     // Actualizar el cliente usando el servicio
     const updatedCliente = await this.clientesService.updateCliente(
       id,
+      userData,
       clienteData,
     );
 

@@ -108,4 +108,28 @@ export class UsersService {
     user.roles.push(role);
     return this.usersRepository.save(user);
   }
+
+  /**
+   * Updates a user's information.
+   * @param userId - The ID of the user to update.
+   * @param userData - Partial user data to update.
+   * @returns The updated user.
+   * @throws BadRequestException if the user is not found.
+   * @throws UnprocessableEntityException if there is an error updating the user.
+   */
+  async updateUser(userId: number, userData: Partial<User>): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    Object.assign(user, userData);
+    await this.usersRepository.save(user);
+    const userSaved = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+    if (!userSaved) {
+      throw new UnprocessableEntityException('Error updating user');
+    }
+    return userSaved;
+  }
 }

@@ -45,10 +45,23 @@ export class ClientesService {
     });
   }
 
+  /**
+   * Updates a cliente's profile and associated user data.
+   * @param userId - The ID of the user associated with the cliente.
+   * @param userData - Partial user data to update (e.g., username, email, password).
+   * @param clienteData - Partial cliente data to update (e.g., nombre, apellido, telefono).
+   * @returns The updated cliente profile.
+   * @throws BadRequestException if the cliente is not found.
+   * @throws InternalServerErrorException if there is an error updating the cliente.
+   */
   async updateCliente(
     userId: number,
+    userData: Partial<User>,
     clienteData: Partial<Cliente>,
   ): Promise<Cliente> {
+    // First, update the user data
+    await this.usersService.updateUser(userId, userData);
+
     const cliente = await this.clientesRepository.findOne({
       where: { userId },
     });
