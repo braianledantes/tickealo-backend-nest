@@ -23,6 +23,8 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateProductoraDto } from './dtos/update-productora.dto';
 import { UpdateClienteDto } from './dtos/update-cliente.dto';
+import { Roles } from './decorators/roles.decorator';
+import { Role } from './enums/role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -59,6 +61,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @Roles(Role.Productora)
   @Patch('productora-perfil')
   @UseInterceptors(FileInterceptor('imagenPerfil'))
   updeteProductoraProfile(
@@ -71,6 +74,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @Roles(Role.Cliente)
   @Patch('cliente-perfil')
   @UseInterceptors(FileInterceptor('imagenPerfil'))
   updateClienteProfile(

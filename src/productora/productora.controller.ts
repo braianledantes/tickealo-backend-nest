@@ -51,4 +51,31 @@ export class ProductoraController {
   ) {
     return this.productoraService.removeMiembroEquipo(id, userEmail);
   }
+
+  @Roles(Role.Productora)
+  @Get('seguidores')
+  getSeguidores(@GetUser('id') idProductora: number) {
+    return this.productoraService.getSeguidores(idProductora);
+  }
+
+  @Roles(Role.Cliente)
+  @Post(':idProductora/seguir')
+  seguirProductora(
+    @GetUser('id') idCliente: number,
+    @Param('idProductora', ParseIntPipe) idProductora: number,
+  ) {
+    return this.productoraService.seguirProductora(idCliente, idProductora);
+  }
+
+  @Roles(Role.Cliente)
+  @Delete(':idProductora/seguir')
+  dejarDeSeguirProductora(
+    @GetUser('id') idCliente: number,
+    @Param('idProductora', ParseIntPipe) idProductora: number,
+  ) {
+    return this.productoraService.dejarDeSeguirProductora(
+      idCliente,
+      idProductora,
+    );
+  }
 }

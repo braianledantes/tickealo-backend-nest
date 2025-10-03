@@ -88,4 +88,20 @@ export class ClientesService {
       where: { user: { email } },
     });
   }
+
+  /**
+   * Finds a cliente by their user ID.
+   * @param id - The user ID of the cliente.
+   * @returns The cliente entity if found, otherwise throws NotFoundException.
+   * @throws NotFoundException if no cliente is found for the given ID.
+   */
+  async findOneById(id: number): Promise<Cliente> {
+    const cliente = await this.clientesRepository.findOne({
+      where: { userId: id },
+    });
+    if (!cliente) {
+      throw new BadRequestException('Cliente not found');
+    }
+    return cliente;
+  }
 }

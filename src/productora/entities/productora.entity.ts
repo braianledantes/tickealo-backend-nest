@@ -12,6 +12,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Evento } from '../../eventos/entities/evento.entity';
 import { Validador } from '../../validador/entities/validador.entity';
+import { Cliente } from '../../clientes/entities/cliente.entity';
 
 @Entity()
 export class Productora {
@@ -56,4 +57,7 @@ export class Productora {
     inverseJoinColumn: { name: 'validador_id', referencedColumnName: 'userId' },
   })
   validadores: Validador[];
+
+  @ManyToMany(() => Cliente, (cliente) => cliente.productorasSeguidas)
+  seguidores: Cliente[];
 }

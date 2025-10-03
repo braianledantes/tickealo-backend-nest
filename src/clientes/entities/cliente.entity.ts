@@ -1,5 +1,14 @@
+import { Productora } from '../../productora/entities/productora.entity';
 import { User } from '../../users/entities/user.entity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 @Entity()
 export class Cliente {
@@ -24,4 +33,15 @@ export class Cliente {
 
   @Column({ name: 'puntos_acumulados', type: 'int', default: 0 })
   puntosAcumulados: number;
+
+  @ManyToMany(() => Productora, (productora) => productora.seguidores)
+  @JoinTable({
+    name: 'clientes_productoras_seguidas',
+    joinColumn: { name: 'cliente_id', referencedColumnName: 'userId' },
+    inverseJoinColumn: {
+      name: 'productora_id',
+      referencedColumnName: 'userId',
+    },
+  })
+  productorasSeguidas: Productora[];
 }
