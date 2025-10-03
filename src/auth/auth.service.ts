@@ -148,10 +148,14 @@ export class AuthService {
     updateProductoraDto: UpdateProductoraDto,
     imageFile?: Express.Multer.File,
   ) {
-    const { cuit, nombre, direccion, telefono } = updateProductoraDto;
+    const { username, email, password, cuit, nombre, direccion, telefono } =
+      updateProductoraDto;
 
     // Preparar datos específicos de la productora
     const productoraData: {
+      username?: string;
+      email?: string;
+      password?: string;
       cuit?: string;
       nombre?: string;
       direccion?: string;
@@ -160,6 +164,9 @@ export class AuthService {
     } = {};
 
     // Solo agregar campos que están definidos en el DTO
+    if (username !== undefined) productoraData.username = username;
+    if (email !== undefined) productoraData.email = email;
+    if (password !== undefined) productoraData.password = password;
     if (cuit !== undefined) productoraData.cuit = cuit;
     if (nombre !== undefined) productoraData.nombre = nombre;
     if (direccion !== undefined) productoraData.direccion = direccion;
@@ -185,10 +192,14 @@ export class AuthService {
     updateClienteDto: UpdateClienteDto,
     imageFile?: Express.Multer.File,
   ) {
-    const { nombre, apellido, telefono } = updateClienteDto;
+    const { username, email, password, nombre, apellido, telefono } =
+      updateClienteDto;
 
     // Preparar datos específicos del cliente
     const clienteData: {
+      username?: string;
+      email?: string;
+      password?: string;
       nombre?: string;
       apellido?: string;
       telefono?: string;
@@ -196,6 +207,9 @@ export class AuthService {
     } = {};
 
     // Solo agregar campos que están definidos en el DTO
+    if (username !== undefined) clienteData.username = username;
+    if (email !== undefined) clienteData.email = email;
+    if (password !== undefined) clienteData.password = password;
     if (nombre !== undefined) clienteData.nombre = nombre;
     if (apellido !== undefined) clienteData.apellido = apellido;
     if (telefono !== undefined) clienteData.telefono = telefono;
