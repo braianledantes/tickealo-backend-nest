@@ -15,12 +15,15 @@ import { CreateEventoDto } from './dto/create-evento.dto';
 import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
 import { Evento } from './entities/evento.entity';
+import { Entrada } from './entities/entrada.entity';
 
 @Injectable()
 export class EventosService {
   constructor(
     @InjectRepository(Evento)
     private readonly eventoRepository: Repository<Evento>,
+    @InjectRepository(Entrada)
+    private readonly entradaRepository: Repository<Entrada>,
     private readonly productoraService: ProductoraService,
     private readonly cuentaBancariaService: CuentaBancariaService,
     private readonly lugaresService: LugaresService,
@@ -235,6 +238,23 @@ export class EventosService {
       throw new NotFoundException('Evento not found');
     }
     return evento;
+  }
+
+  /**
+   * Devuelve una entrada por su ID.
+   * @param id ID de la entrada a buscar.
+   * @returns La entrada encontrada.
+   * @throws NotFoundException si la entrada no existe.
+   */
+  async findEntradaById(id: number): Promise<Entrada> {
+    const entrada = await this.entradaRepository.findOne({
+      where: { id },
+      relations: ['evento', 'tickets'],
+    });
+    if (!entrada) {
+      throw new NotFoundException('Entrada not found');
+    }
+    return entrada;
   }
 
   /** Actualiza un evento existente.

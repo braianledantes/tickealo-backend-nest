@@ -3,8 +3,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Ticket } from '../../tickets/entities/ticket.entity';
 import { Evento } from './evento.entity';
 
 @Entity()
@@ -24,4 +26,7 @@ export class Entrada {
 
   @Column()
   cantidad: number;
+
+  @OneToMany(() => Ticket, (ticket) => ticket.entrada)
+  tickets: Ticket[];
 }

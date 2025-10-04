@@ -1,14 +1,17 @@
-import { Productora } from '../../productora/entities/productora.entity';
-import { User } from '../../users/entities/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   JoinTable,
   ManyToMany,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+import { Compra } from '../../compras/entities/compra.entity';
+import { Productora } from '../../productora/entities/productora.entity';
+import { Ticket } from '../../tickets/entities/ticket.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Cliente {
@@ -44,4 +47,10 @@ export class Cliente {
     },
   })
   productorasSeguidas: Productora[];
+
+  @OneToMany(() => Compra, (compra) => compra.cliente)
+  compras: Compra[];
+
+  @OneToMany(() => Ticket, (ticket) => ticket.cliente)
+  tickets: Ticket[];
 }
