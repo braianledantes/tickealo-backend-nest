@@ -13,6 +13,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
+import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { ImageFileValidationPipe } from 'src/files/pipes/image-file-validation.pipe';
 import { ComprasService } from './compras.service';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
@@ -35,8 +36,11 @@ export class ComprasController {
 
   @Roles(Role.Productora)
   @Get()
-  getMisCompras(@GetUser('id') userId: number) {
-    return this.comprasService.getComprasDeMisEventos(userId);
+  getMisCompras(
+    @GetUser('id') userId: number,
+    @Body() paginationDto: PaginationDto,
+  ) {
+    return this.comprasService.getComprasDeMisEventos(userId, paginationDto);
   }
 
   @Roles(Role.Productora)
@@ -59,8 +63,11 @@ export class ComprasController {
 
   @Roles(Role.Cliente)
   @Get('mis-compras')
-  getMisComprasCliente(@GetUser('id') userId: number) {
-    return this.comprasService.getComprasDeCliente(userId);
+  getMisComprasCliente(
+    @GetUser('id') userId: number,
+    paginationDto: PaginationDto,
+  ) {
+    return this.comprasService.getComprasDeCliente(userId, paginationDto);
   }
 
   @Roles(Role.Cliente, Role.Productora)

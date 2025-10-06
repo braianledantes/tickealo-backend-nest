@@ -16,6 +16,7 @@ import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
 import { Evento } from './entities/evento.entity';
 import { Entrada } from './entities/entrada.entity';
+import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
 
 @Injectable()
 export class EventosService {
@@ -124,7 +125,9 @@ export class EventosService {
    * @param findEventosDto Parámetros de búsqueda, paginación y ordenación.
    * @returns Un objeto con los eventos paginados y metadatos.
    */
-  async findAllPaginated(findEventosDto: FindEventosDto) {
+  async findAllPaginated(
+    findEventosDto: FindEventosDto,
+  ): Promise<PaginatioResponseDto<Evento>> {
     const {
       search,
       page,

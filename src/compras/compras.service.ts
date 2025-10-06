@@ -1,16 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
+import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
+import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { EventosService } from 'src/eventos/eventos.service';
 import { FileUploadService } from 'src/files/file-upload.service';
+import { Ticket } from 'src/tickets/entities/ticket.entity';
 import { EstadoTicket } from 'src/tickets/enums/estado-ticket.enum';
-import { Repository, DataSource } from 'typeorm';
+import { TicketsService } from 'src/tickets/tickets.service';
+import { generarSiguienteCodigoAlfanumerico } from 'src/utils/codigos';
+import { DataSource, Repository } from 'typeorm';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 import { Compra } from './entities/compra.entity';
-import { TicketsService } from 'src/tickets/tickets.service';
 import { EstadoCompra } from './enums/estado-compra.enum';
-import { Ticket } from 'src/tickets/entities/ticket.entity';
-import { generarSiguienteCodigoAlfanumerico } from 'src/utils/codigos';
 
 @Injectable()
 export class ComprasService {
@@ -144,8 +146,13 @@ export class ComprasService {
    * @param productoraId ID de la productora cuyas compras se desean obtener.
    * @returns Un array de compras relacionadas con los eventos de la productora.
    */
-  getComprasDeMisEventos(productoraId: number): Promise<Compra[]> {
-    return this.comprasRepository.find({
+  async getComprasDeMisEventos(
+    productoraId: number,
+    paginationDto: PaginationDto,
+  ): Promise<PaginatioResponseDto<Compra>> {
+    const { limit = 10, page = 0 } = paginationDto;
+
+    const [result, total] = await this.comprasRepository.findAndCount({
       where: {
         tickets: {
           entrada: { evento: { productora: { userId: productoraId } } },
@@ -153,7 +160,19 @@ export class ComprasService {
       },
       relations: ['cliente', 'tickets'],
       order: { createdAt: 'DESC' },
+      take: limit,
+      skip: (page - 1) * limit,
     });
+
+    return {
+      data: result,
+      pagination: {
+        total: total,
+        page: page,
+        hasNextPage: total > page * limit,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   /**
@@ -213,12 +232,29 @@ export class ComprasService {
    * @param clienteId ID del cliente cuyas compras se desean obtener.
    * @returns Un array de compras realizadas por el cliente.
    */
-  getComprasDeCliente(clienteId: number): Promise<Compra[]> {
-    return this.comprasRepository.find({
+  async getComprasDeCliente(
+    clienteId: number,
+    paginationDto: PaginationDto,
+  ): Promise<PaginatioResponseDto<Compra>> {
+    const { limit = 10, page = 0 } = paginationDto;
+
+    const [result, total] = await this.comprasRepository.findAndCount({
       where: { cliente: { userId: clienteId } },
       relations: ['tickets', 'tickets.entrada'],
       order: { createdAt: 'DESC' },
+      take: limit,
+      skip: (page - 1) * limit,
     });
+
+    return {
+      data: result,
+      pagination: {
+        total: total,
+        page: page,
+        hasNextPage: total > page * limit,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   /**
