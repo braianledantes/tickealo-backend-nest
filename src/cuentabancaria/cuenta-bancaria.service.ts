@@ -53,6 +53,7 @@ export class CuentaBancariaService {
 
     return this.cuentaBancariaRepository.findOne({
       where: { id: savedCuentaBancaria.id },
+      relations: ['productora'],
     });
   }
 
@@ -64,6 +65,7 @@ export class CuentaBancariaService {
   async findByProductora(userId: number) {
     const cuentaBancaria = await this.cuentaBancariaRepository.findOne({
       where: { productora: { userId } },
+      relations: ['productora'],
     });
 
     if (!cuentaBancaria) {
@@ -84,6 +86,7 @@ export class CuentaBancariaService {
   async findById(id: number) {
     const cuentaBancaria = await this.cuentaBancariaRepository.findOne({
       where: { id },
+      relations: ['productora'],
     });
 
     if (!cuentaBancaria) {
@@ -106,6 +109,7 @@ export class CuentaBancariaService {
   ) {
     const cuentaBancaria = await this.cuentaBancariaRepository.findOne({
       where: { productora: { userId } },
+      relations: ['productora'],
     });
 
     if (!cuentaBancaria) {
@@ -126,6 +130,7 @@ export class CuentaBancariaService {
   async remove(userId: number) {
     const cuentaBancaria = await this.cuentaBancariaRepository.findOne({
       where: { productora: { userId } },
+      relations: ['productora'],
     });
 
     if (!cuentaBancaria) {

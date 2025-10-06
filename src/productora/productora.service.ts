@@ -56,6 +56,7 @@ export class ProductoraService {
     await this.productoraRepository.save(productora);
     return this.productoraRepository.findOneOrFail({
       where: { userId: user.id },
+      relations: ['user'],
     });
   }
 
@@ -95,6 +96,7 @@ export class ProductoraService {
     await this.productoraRepository.save(productora);
     const productoraSaved = await this.productoraRepository.findOne({
       where: { userId },
+      relations: ['user'],
     });
     if (!productoraSaved) {
       throw new InternalServerErrorException(
@@ -112,7 +114,7 @@ export class ProductoraService {
   async getProfile(userId: number): Promise<Productora | null> {
     return this.productoraRepository.findOne({
       where: { userId },
-      relations: ['cuentaBancaria'],
+      relations: ['cuentaBancaria', 'user'],
     });
   }
 
@@ -124,7 +126,7 @@ export class ProductoraService {
   async findOneByUserId(userId: number) {
     return this.productoraRepository.findOne({
       where: { userId },
-      relations: ['validadores', 'cuentaBancaria', 'eventos'],
+      relations: ['validadores', 'cuentaBancaria', 'eventos', 'user'],
     });
   }
 
@@ -137,7 +139,12 @@ export class ProductoraService {
   async getEventosProductora(idProductora: number) {
     const productora = await this.productoraRepository.findOne({
       where: { userId: idProductora },
-      relations: ['eventos'],
+      relations: [
+        'eventos',
+        'eventos.lugar',
+        'eventos.cuentaBancaria',
+        'eventos.entradas',
+      ],
     });
     if (!productora) {
       throw new BadRequestException('La productora no existe');
@@ -203,7 +210,11 @@ export class ProductoraService {
       throw new BadRequestException('El validador ya es miembro del equipo');
     }
     productora.validadores.push(validador);
-    return await this.productoraRepository.save(productora);
+    await this.productoraRepository.save(productora);
+    return this.productoraRepository.findOne({
+      where: { userId: idProductora },
+      relations: ['user'],
+    });
   }
 
   /**
@@ -237,7 +248,11 @@ export class ProductoraService {
     productora.validadores = productora.validadores.filter(
       (v) => v.userId !== validador.userId,
     );
-    return await this.productoraRepository.save(productora);
+    await this.productoraRepository.save(productora);
+    return this.productoraRepository.findOne({
+      where: { userId: idProductora },
+      relations: ['user'],
+    });
   }
 
   /**

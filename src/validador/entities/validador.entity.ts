@@ -13,7 +13,7 @@ export class Validador {
   @PrimaryColumn({ name: 'user_id' })
   userId: number;
 
-  @OneToOne(() => Cliente, { onDelete: 'CASCADE', eager: true })
+  @OneToOne(() => Cliente, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   cliente: Cliente;
 

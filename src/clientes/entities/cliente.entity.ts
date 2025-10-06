@@ -18,7 +18,7 @@ export class Cliente {
   @PrimaryColumn({ name: 'user_id' })
   userId: number;
 
-  @OneToOne(() => User, { onDelete: 'CASCADE', eager: true })
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

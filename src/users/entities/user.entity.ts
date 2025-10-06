@@ -35,7 +35,7 @@ export class User {
   emailVerifiedAt: Date;
 
   @Exclude()
-  @ManyToMany(() => Role, (role) => role.users, { eager: true })
+  @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   roles: Role[];
 

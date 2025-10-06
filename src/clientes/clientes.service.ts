@@ -42,6 +42,7 @@ export class ClientesService {
     await this.clientesRepository.save(cliente);
     return this.clientesRepository.findOneOrFail({
       where: { userId: user.id },
+      relations: ['user'],
     });
   }
 
@@ -72,6 +73,7 @@ export class ClientesService {
     await this.clientesRepository.save(cliente);
     const clienteSaved = await this.clientesRepository.findOne({
       where: { userId },
+      relations: ['user'],
     });
     if (!clienteSaved) {
       throw new InternalServerErrorException('Error updating cliente');
@@ -87,6 +89,7 @@ export class ClientesService {
   async getProfile(userId: number): Promise<Cliente | null> {
     return this.clientesRepository.findOne({
       where: { userId },
+      relations: ['user'],
     });
   }
 
@@ -99,6 +102,7 @@ export class ClientesService {
   async findOneByEmail(email: string) {
     return await this.clientesRepository.findOne({
       where: { user: { email } },
+      relations: ['user'],
     });
   }
 
@@ -111,6 +115,7 @@ export class ClientesService {
   async findOneById(id: number): Promise<Cliente> {
     const cliente = await this.clientesRepository.findOne({
       where: { userId: id },
+      relations: ['user'],
     });
     if (!cliente) {
       throw new BadRequestException('Cliente not found');

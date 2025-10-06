@@ -23,7 +23,10 @@ export class UsersService {
    * @returns The user if found, otherwise null.
    */
   async findOne(username: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { username } });
+    return this.usersRepository.findOne({
+      where: { username },
+      relations: ['roles'],
+    });
   }
 
   /**
@@ -147,6 +150,7 @@ export class UsersService {
     await this.usersRepository.save(user);
     const userSaved = await this.usersRepository.findOne({
       where: { id: userId },
+      relations: ['roles'],
     });
 
     // Verify the user was updated

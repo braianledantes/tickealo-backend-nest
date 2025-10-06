@@ -18,9 +18,7 @@ export class Evento {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Productora, (productora) => productora.eventos, {
-    eager: true,
-  })
+  @ManyToOne(() => Productora, (productora) => productora.eventos)
   @JoinColumn({ name: 'productora_id' })
   productora: Productora;
 
@@ -45,17 +43,16 @@ export class Evento {
   @Column({ name: 'banner_url', nullable: true })
   bannerUrl: string;
 
-  @ManyToOne(() => Lugar, (lugar) => lugar.eventos, { eager: true })
+  @ManyToOne(() => Lugar, (lugar) => lugar.eventos)
   @JoinColumn({ name: 'lugar_id' })
   lugar: Lugar;
 
   @OneToMany(() => Entrada, (entrada) => entrada.evento, {
     cascade: true,
-    eager: true,
   })
   entradas: Entrada[];
 
-  @ManyToOne(() => CuentaBancaria, (cb) => cb.eventos, { eager: true })
+  @ManyToOne(() => CuentaBancaria, (cb) => cb.eventos)
   @JoinColumn({ name: 'cuenta_bancaria_id' })
   cuentaBancaria: CuentaBancaria;
 

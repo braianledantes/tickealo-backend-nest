@@ -65,7 +65,7 @@ export class EventosService {
     const eventoSaved = await this.eventoRepository.save(evento);
     return this.eventoRepository.findOne({
       where: { id: eventoSaved.id },
-      relations: ['lugar', 'productora', 'cuentaBancaria'],
+      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
     });
   }
 
@@ -182,7 +182,7 @@ export class EventosService {
     }
 
     const [result, total] = await this.eventoRepository.findAndCount({
-      relations: ['lugar', 'productora'],
+      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
       skip: (page - 1) * limit,
       take: limit,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -235,7 +235,7 @@ export class EventosService {
   async findOne(id: number) {
     const evento = await this.eventoRepository.findOne({
       where: { id },
-      relations: ['lugar', 'productora', 'cuentaBancaria'],
+      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
     });
     if (!evento) {
       throw new NotFoundException('Evento not found');
@@ -252,7 +252,13 @@ export class EventosService {
   async findEntradaById(id: number): Promise<Entrada> {
     const entrada = await this.entradaRepository.findOne({
       where: { id },
-      relations: ['evento', 'tickets'],
+      relations: [
+        'evento',
+        'evento.lugar',
+        'evento.productora',
+        'evento.cuentaBancaria',
+        'tickets',
+      ],
     });
     if (!entrada) {
       throw new NotFoundException('Entrada not found');
@@ -330,7 +336,7 @@ export class EventosService {
 
     return this.eventoRepository.find({
       where: { inicioAt: MoreThanOrEqual(now) },
-      relations: ['lugar', 'productora', 'cuentaBancaria'],
+      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
       order: { inicioAt: 'ASC' },
     });
   }

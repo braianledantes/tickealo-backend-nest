@@ -43,6 +43,7 @@ export class ValidadorService {
   async findOneByEmail(email: string) {
     return await this.validadoresRepository.findOne({
       where: { cliente: { user: { email } } },
+      relations: ['cliente', 'cliente.user'],
     });
   }
 }
