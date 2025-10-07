@@ -6,10 +6,21 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
@@ -18,10 +29,20 @@ import { ImageFileValidationPipe } from 'src/files/pipes/image-file-validation.p
 import { ComprasService } from './compras.service';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 
+@ApiTags('Compras')
+@ApiBearerAuth()
 @Controller('compras')
 export class ComprasController {
   constructor(private readonly comprasService: ComprasService) {}
 
+  @ApiOperation({ summary: 'Comprar entrada para un evento' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: ComprarEntradaDto })
+  @ApiResponse({ status: 201, description: 'Compra realizada exitosamente' })
+  @ApiResponse({ status: 400, description: 'Datos de compra inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 403, description: 'Acceso denegado - Solo clientes' })
+  @ApiResponse({ status: 404, description: 'Evento o entrada no encontrada' })
   @Roles(Role.Cliente)
   @Post('comprar-entrada')
   @UseInterceptors(FileInterceptor('comprobanteTransferencia'))
@@ -34,15 +55,37 @@ export class ComprasController {
     return this.comprasService.comprarEntrada(userId, comprarEntradaDto, file);
   }
 
+  @ApiOperation({
+    summary: 'Obtener compras de eventos de la productora autenticada',
+  })
+  @ApiQuery({ type: PaginationDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de compras obtenida exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo productoras',
+  })
   @Roles(Role.Productora)
   @Get()
   getMisCompras(
     @GetUser('id') userId: number,
-    @Body() paginationDto: PaginationDto,
+    @Query() paginationDto: PaginationDto,
   ) {
     return this.comprasService.getComprasDeMisEventos(userId, paginationDto);
   }
 
+  @ApiOperation({ summary: 'Cancelar una compra' })
+  @ApiParam({ name: 'compraId', description: 'ID de la compra a cancelar' })
+  @ApiResponse({ status: 200, description: 'Compra cancelada exitosamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo productoras',
+  })
+  @ApiResponse({ status: 404, description: 'Compra no encontrada' })
   @Roles(Role.Productora)
   @Patch('cancelar-compra/:compraId')
   cancelarCompra(
@@ -52,6 +95,15 @@ export class ComprasController {
     return this.comprasService.cancelarCompra(userId, compraId);
   }
 
+  @ApiOperation({ summary: 'Aceptar una compra' })
+  @ApiParam({ name: 'compraId', description: 'ID de la compra a aceptar' })
+  @ApiResponse({ status: 200, description: 'Compra aceptada exitosamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo productoras',
+  })
+  @ApiResponse({ status: 404, description: 'Compra no encontrada' })
   @Roles(Role.Productora)
   @Patch('aceptar-compra/:compraId')
   async aceptarCompra(
@@ -61,15 +113,32 @@ export class ComprasController {
     await this.comprasService.aceptarCompra(userId, compraId);
   }
 
+  @ApiOperation({ summary: 'Obtener compras del cliente autenticado' })
+  @ApiQuery({ type: PaginationDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de compras del cliente obtenida exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 403, description: 'Acceso denegado - Solo clientes' })
   @Roles(Role.Cliente)
   @Get('mis-compras')
   getMisComprasCliente(
     @GetUser('id') userId: number,
-    paginationDto: PaginationDto,
+    @Query() paginationDto: PaginationDto,
   ) {
     return this.comprasService.getComprasDeCliente(userId, paginationDto);
   }
 
+  @ApiOperation({ summary: 'Obtener detalles de una compra específica' })
+  @ApiParam({ name: 'compraId', description: 'ID de la compra' })
+  @ApiResponse({
+    status: 200,
+    description: 'Detalles de la compra obtenidos exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 403, description: 'Acceso denegado' })
+  @ApiResponse({ status: 404, description: 'Compra no encontrada' })
   @Roles(Role.Cliente, Role.Productora)
   @Get(':compraId')
   getCompraById(

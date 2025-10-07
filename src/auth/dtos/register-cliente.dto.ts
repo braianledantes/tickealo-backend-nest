@@ -3,15 +3,35 @@ import { RegisterUserDto } from './register-user.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterClienteDto extends RegisterUserDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Nombre del cliente',
+    example: 'Juan',
+    type: String,
+  })
   @IsString()
   nombre: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Apellido del cliente',
+    example: 'Pérez',
+    type: String,
+  })
   @IsString()
   apellido: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Número de teléfono del cliente',
+    example: '+54 9 11 1234-5678',
+    type: String,
+  })
   @IsString()
   telefono: string;
+
+  @ApiProperty({
+    description: 'Imagen de perfil del cliente',
+    type: 'string',
+    format: 'binary',
+    required: false,
+  })
+  imagenPerfil?: Express.Multer.File;
 }

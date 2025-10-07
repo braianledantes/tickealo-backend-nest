@@ -14,21 +14,43 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { MultipleImageFileValidationPipe } from 'src/files/pipes/multiple-image-file-validation.pipe';
 import { CreateEventoDto } from './dto/create-evento.dto';
+import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
 import { EventosService } from './eventos.service';
-import { FindEventosDto } from './dto/find-eventos.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Eventos')
 @ApiBearerAuth()
 @Controller('eventos')
 export class EventosController {
   constructor(private readonly eventosService: EventosService) {}
 
+  @ApiOperation({
+    summary: 'Crear un nuevo evento',
+    description: '🏢 **Acceso:** Solo Productoras autenticadas',
+  })
+  @ApiBody({ type: CreateEventoDto })
+  @ApiResponse({ status: 201, description: 'Evento creado exitosamente' })
+  @ApiResponse({ status: 400, description: 'Datos del evento inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo productoras',
+  })
   @Roles(Role.Productora)
   @Post()
   create(
@@ -38,11 +60,53 @@ export class EventosController {
     return this.eventosService.create(userId, createEventoDto);
   }
 
+  @ApiOperation({
+    summary: 'Obtener eventos próximos',
+    description: '🌐 **Acceso:** Público - No requiere autenticación',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de eventos próximos obtenida exitosamente',
+  })
   @Get('proximos')
   findUpcoming() {
     return this.eventosService.findUpcoming();
   }
 
+  @ApiOperation({
+    summary: 'Actualizar imágenes de un evento',
+    description:
+      '🏢 **Acceso:** Solo Productoras autenticadas (propietarias del evento)',
+  })
+  @ApiParam({ name: 'id', description: 'ID del evento' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        portada: {
+          type: 'string',
+          format: 'binary',
+          description: 'Imagen de portada del evento',
+        },
+        banner: {
+          type: 'string',
+          format: 'binary',
+          description: 'Banner del evento',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Imágenes actualizadas exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo productoras',
+  })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Roles(Role.Productora)
   @Patch(':id/imagenes')
   @UseInterceptors(
@@ -60,16 +124,47 @@ export class EventosController {
     return this.eventosService.updateImagenes(userId, id, files);
   }
 
+  @ApiOperation({
+    summary: 'Obtener todos los eventos con paginación',
+    description: '🌐 **Acceso:** Público - No requiere autenticación',
+  })
+  @ApiQuery({ type: FindEventosDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista paginada de eventos obtenida exitosamente',
+  })
   @Get()
   findAll(@Query() findEventosDto: FindEventosDto) {
     return this.eventosService.findAllPaginated(findEventosDto);
   }
 
+  @ApiOperation({
+    summary: 'Obtener un evento por ID',
+    description: '🌐 **Acceso:** Público - No requiere autenticación',
+  })
+  @ApiParam({ name: 'id', description: 'ID del evento' })
+  @ApiResponse({ status: 200, description: 'Evento obtenido exitosamente' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.eventosService.findOne(id);
   }
 
+  @ApiOperation({
+    summary: 'Actualizar un evento',
+    description:
+      '🏢 **Acceso:** Solo Productoras autenticadas (propietarias del evento)',
+  })
+  @ApiParam({ name: 'id', description: 'ID del evento' })
+  @ApiBody({ type: UpdateEventoDto })
+  @ApiResponse({ status: 200, description: 'Evento actualizado exitosamente' })
+  @ApiResponse({ status: 400, description: 'Datos del evento inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo productoras',
+  })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Roles(Role.Productora)
   @Patch(':id')
   update(
@@ -80,6 +175,19 @@ export class EventosController {
     return this.eventosService.update(userId, id, updateEventoDto);
   }
 
+  @ApiOperation({
+    summary: 'Eliminar un evento',
+    description:
+      '🏢👤 **Acceso:** Solo Productoras (propietarias) y Administradores',
+  })
+  @ApiParam({ name: 'id', description: 'ID del evento' })
+  @ApiResponse({ status: 204, description: 'Evento eliminado exitosamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo productoras y administradores',
+  })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Roles(Role.Productora, Role.Admin)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
