@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -58,7 +59,7 @@ export class UsersService {
    * @param userData - Partial user data including username, email, and password.
    * @param roleName - The role to assign ('productora', 'validador', or 'cliente').
    * @returns The created user.
-   * @throws BadRequestException if username or email already exists.
+   * @throws ConflictException if username or email already exists.
    * @throws UnprocessableEntityException if the specified role does not exist.
    */
   async createUserWithRole(
@@ -70,7 +71,7 @@ export class UsersService {
       where: [{ username: userData.username }, { email: userData.email }],
     });
     if (existingUser) {
-      throw new BadRequestException('Username or email already exists');
+      throw new ConflictException('Username or email already exists');
     }
 
     // Asign the role to the user
@@ -118,6 +119,8 @@ export class UsersService {
    * @param userData - Partial user data to update.
    * @returns The updated user.
    * @throws BadRequestException if the user is not found.
+   * @throws ConflictException if the new username already exists.
+   * @throws BadRequestException if the new email already exists.
    * @throws UnprocessableEntityException if there is an error updating the user.
    */
   async updateUser(userId: number, userData: Partial<User>): Promise<User> {
@@ -127,7 +130,7 @@ export class UsersService {
         where: { username: userData.username },
       });
       if (existingUser && existingUser.id !== userId) {
-        throw new BadRequestException('Username already exists');
+        throw new ConflictException('Username already exists');
       }
     }
     if (userData.email) {
@@ -135,7 +138,7 @@ export class UsersService {
         where: { email: userData.email },
       });
       if (existingUser && existingUser.id !== userId) {
-        throw new BadRequestException('Email already exists');
+        throw new ConflictException('Email already exists');
       }
     }
 

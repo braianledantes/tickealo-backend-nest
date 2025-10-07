@@ -1,14 +1,14 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ProductoraService } from 'src/productora/productora.service';
 import { Repository } from 'typeorm';
 import { CreateCuentaBancariaDto } from './dto/create-cuenta-bancaria.dto';
 import { UpdateCuentaBancariaDto } from './dto/update-cuenta-bancaria.dto';
 import { CuentaBancaria } from './entities/cuenta-bancaria.entity';
-import { ProductoraService } from 'src/productora/productora.service';
 
 @Injectable()
 export class CuentaBancariaService {
@@ -22,7 +22,8 @@ export class CuentaBancariaService {
    * Creates a new CuentaBancaria entity associated with a given Productora user ID.
    * @param userId - The ID of the Productora user.
    * @param createCuentaBancariaDto - The data to create the CuentaBancaria with.
-   * @throws BadRequestException if the Productora does not exist or already has a CuentaBancaria.
+   * @throws BadRequestException if the Productora does not exist.
+   * @throws ConflictException if a CuentaBancaria already exists for the Productora.
    * @returns The created CuentaBancaria entity.
    */
   async create(
@@ -39,7 +40,7 @@ export class CuentaBancariaService {
     });
 
     if (existingCuenta) {
-      throw new BadRequestException(
+      throw new ConflictException(
         'CuentaBancaria already exists for this Productora',
       );
     }

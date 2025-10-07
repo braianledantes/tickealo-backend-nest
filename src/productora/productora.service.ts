@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -27,7 +28,7 @@ export class ProductoraService {
    * @param userData - Partial user data including username, email, and password.
    * @param productoraData - Partial productora data including cuit, nombre, direccion, and telefono.
    * @returns The created productora profile.
-   * @throws BadRequestException if username, email, or CUIT already exists.
+   * @throws ConflictException if username, email, or CUIT already exists.
    * @throws UnprocessableEntityException if the specified role does not exist.
    */
   async createProductora(
@@ -39,7 +40,7 @@ export class ProductoraService {
       where: { cuit: productoraData.cuit },
     });
     if (existingProductora) {
-      throw new BadRequestException('CUIT already exists');
+      throw new ConflictException('CUIT already exists');
     }
 
     // Create the user with the productora role
@@ -306,7 +307,7 @@ export class ProductoraService {
       .getCount();
 
     if (existingRelation > 0) {
-      throw new BadRequestException('El cliente ya sigue a la productora');
+      throw new ConflictException('El cliente ya sigue a la productora');
     }
 
     // Insertar la relación directamente

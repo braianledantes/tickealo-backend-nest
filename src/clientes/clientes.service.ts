@@ -22,7 +22,7 @@ export class ClientesService {
    * @param userData - Partial user data including username, email, and password.
    * @param clienteData - Partial cliente data including nombre, apellido, and telefono.
    * @returns The created cliente profile.
-   * @throws BadRequestException if username or email already exists.
+   * @throws ConflictException if username or email already exists.
    * @throws UnprocessableEntityException if the specified role does not exist.
    */
   async createCliente(
