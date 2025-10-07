@@ -158,7 +158,12 @@ export class ComprasService {
           entrada: { evento: { productora: { userId: productoraId } } },
         },
       },
-      relations: ['cliente', 'tickets'],
+      relations: [
+        'cliente',
+        'tickets',
+        'tickets.entrada',
+        'tickets.entrada.evento',
+      ],
       order: { createdAt: 'DESC' },
       take: limit,
       skip: (page - 1) * limit,
@@ -240,7 +245,7 @@ export class ComprasService {
 
     const [result, total] = await this.comprasRepository.findAndCount({
       where: { cliente: { userId: clienteId } },
-      relations: ['tickets', 'tickets.entrada'],
+      relations: ['tickets', 'tickets.entrada', 'tickets.entrada.evento'],
       order: { createdAt: 'DESC' },
       take: limit,
       skip: (page - 1) * limit,
@@ -276,7 +281,12 @@ export class ComprasService {
           },
         },
       ],
-      relations: ['cliente', 'tickets', 'tickets.entrada'],
+      relations: [
+        'cliente',
+        'tickets',
+        'tickets.entrada',
+        'tickets.entrada.evento',
+      ],
     });
 
     if (!compra) {
