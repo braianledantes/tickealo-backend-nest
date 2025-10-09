@@ -56,11 +56,25 @@ export class EventosService {
 
     const lugar = await this.lugaresService.upsert(createEventoDto.lugar);
 
+    const capacidad =
+      createEventoDto.entradas?.reduce(
+        (sum, entrada) => sum + entrada.cantidad,
+        0,
+      ) ?? 0;
+
+    const entradas = (createEventoDto.entradas ?? []).map((entrada) => ({
+      ...entrada,
+      stock: entrada.cantidad,
+    }));
+
     const evento = this.eventoRepository.create({
       ...createEventoDto,
+      capacidad,
+      stockEntradas: capacidad,
       lugar,
       productora,
       cuentaBancaria,
+      entradas,
     });
     const eventoSaved = await this.eventoRepository.save(evento);
     return this.eventoRepository.findOne({
@@ -339,5 +353,63 @@ export class EventosService {
       relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
       order: { inicioAt: 'ASC' },
     });
+  }
+
+  /**
+   * Incrementa el stock disponible de una entrada y actualiza el stock del evento asociado.
+   * @param entradaId ID de la entrada a actualizar.
+   * @param cantidad Cantidad a incrementar.
+   * @throws NotFoundException si la entrada no existe.
+   */
+  async incrementarStockEntrada(entradaId: number, cantidad: number) {
+    const entrada = await this.entradaRepository.findOne({
+      where: { id: entradaId },
+      relations: ['evento'],
+    });
+    if (!entrada) {
+      throw new NotFoundException('Entrada not found');
+    }
+    entrada.stock += cantidad;
+    if (entrada.stock > entrada.cantidad) {
+      entrada.stock = entrada.cantidad; // No puede exceder la cantidad inicial
+    }
+    await this.entradaRepository.save(entrada);
+
+    // Actualiza el stock de entradas del evento
+    const evento = entrada.evento;
+    evento.stockEntradas += cantidad;
+    if (evento.stockEntradas > evento.capacidad) {
+      evento.stockEntradas = evento.capacidad; // No puede exceder la capacidad del evento
+    }
+    await this.eventoRepository.save(evento);
+  }
+
+  /**
+   * Decrementa el stock disponible de una entrada y actualiza el stock del evento asociado.
+   * @param entradaId ID de la entrada a actualizar.
+   * @param cantidad Cantidad a decrementar.
+   * @throws NotFoundException si la entrada no existe.
+   * @throws BadRequestException si no hay suficiente stock disponible.
+   */
+  async decrementarStockEntrada(entradaId: number, cantidad: number) {
+    const entrada = await this.entradaRepository.findOne({
+      where: { id: entradaId },
+      relations: ['evento'],
+    });
+    if (!entrada) {
+      throw new NotFoundException('Entrada not found');
+    }
+    if (entrada.stock < cantidad) {
+      throw new BadRequestException('No hay suficiente stock disponible');
+    }
+    entrada.stock -= cantidad;
+    await this.entradaRepository.save(entrada);
+    // Actualiza el stock de entradas del evento
+    const evento = entrada.evento;
+    evento.stockEntradas -= cantidad;
+    if (evento.stockEntradas < 0) {
+      evento.stockEntradas = 0; // No puede ser negativo
+    }
+    await this.eventoRepository.save(evento);
   }
 }

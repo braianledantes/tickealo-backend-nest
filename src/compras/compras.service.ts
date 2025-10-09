@@ -5,10 +5,7 @@ import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
 import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { EventosService } from 'src/eventos/eventos.service';
 import { FileUploadService } from 'src/files/file-upload.service';
-import { Ticket } from 'src/tickets/entities/ticket.entity';
-import { EstadoTicket } from 'src/tickets/enums/estado-ticket.enum';
 import { TicketsService } from 'src/tickets/tickets.service';
-import { generarSiguienteCodigoAlfanumerico } from 'src/utils/codigos';
 import { DataSource, Repository } from 'typeorm';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 import { Compra } from './entities/compra.entity';
@@ -41,104 +38,59 @@ export class ComprasService {
     fileComprobanteTransferencia?: Express.Multer.File,
   ): Promise<Compra | null> {
     const { idEntrada, cant } = comprarEntradaDto;
-
-    // Crear un query runner para manejar la transacción
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // verifico que exista el cliente
-      const cliente = await this.clientesService.findOneById(userId);
-
-      // verifico que exista la entrada y obtengo el evento
-      const entrada = await this.eventosService.findEntradaById(idEntrada);
-
-      // verifico que haya subido el comprobante de transferencia
-      if (!fileComprobanteTransferencia) {
-        throw new BadRequestException(
-          'El comprobante de transferencia es obligatorio.',
-        );
-      }
-
-      // verifico que el evento no haya finalizado
-      const currentDate = new Date();
-      if (entrada.evento.finAt < currentDate) {
-        throw new BadRequestException(
-          'No se pueden comprar entradas para eventos que ya han ocurrido.',
-        );
-      }
-
-      // verifico que haya entradas disponibles
-      const cantTicketsNoCancelados = entrada.tickets.reduce(
-        (acc, ticket) =>
-          ticket.estado !== EstadoTicket.COMPRA_CANCELADO ? acc : acc + 1,
-        0,
+    // verifico que exista el cliente
+    const cliente = await this.clientesService.findOneById(userId);
+    // verifico que exista la entrada y obtengo el evento
+    const entrada = await this.eventosService.findEntradaById(idEntrada);
+    // verifico que haya subido el comprobante de transferencia
+    if (!fileComprobanteTransferencia) {
+      throw new BadRequestException(
+        'El comprobante de transferencia es obligatorio.',
       );
-      const entradasDisponibles = entrada.cantidad - cantTicketsNoCancelados;
-      if (entradasDisponibles < cant) {
-        throw new BadRequestException(
-          `No hay suficientes entradas disponibles. Quedan ${entradasDisponibles} entradas.`,
-        );
-      }
-
-      // guardo el archivo del comprobante de transferencia
-      const fileUrl = await this.filesService.saveImage(
-        fileComprobanteTransferencia,
-      );
-
-      const montoTotal = Number(entrada.precio) * cant;
-
-      const compra = queryRunner.manager.create(Compra, {
-        comprobanteTransferencia: fileUrl,
-        monto: montoTotal,
-        cliente: cliente,
-      });
-
-      const compraGuardada = await queryRunner.manager.save(compra);
-
-      // Crear y guardar los tickets dentro de la transacción
-      const lastTicket = await queryRunner.manager.findOne(Ticket, {
-        where: {},
-        order: { codigoAlfanumerico: 'DESC' },
-      });
-
-      let lastCode = '';
-      if (lastTicket) {
-        lastCode = lastTicket.codigoAlfanumerico;
-      }
-
-      const tickets: Ticket[] = [];
-      for (let i = 0; i < cant; i++) {
-        const codigoAlfanumerico = generarSiguienteCodigoAlfanumerico(lastCode);
-
-        const ticket = queryRunner.manager.create(Ticket, {
-          codigoAlfanumerico,
-          cliente,
-          entrada,
-          compra: compraGuardada,
-        });
-        tickets.push(ticket);
-        lastCode = codigoAlfanumerico;
-      }
-
-      await queryRunner.manager.save(Ticket, tickets);
-
-      // Confirmar la transacción
-      await queryRunner.commitTransaction();
-
-      return this.comprasRepository.findOne({
-        where: { id: compraGuardada.id },
-        relations: ['tickets', 'cliente'],
-      });
-    } catch (error) {
-      // Revertir la transacción en caso de error
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      // Liberar el query runner
-      await queryRunner.release();
     }
+    // verifico que el evento no haya finalizado
+    const currentDate = new Date();
+    if (entrada.evento.finAt < currentDate) {
+      throw new BadRequestException(
+        'No se pueden comprar entradas para eventos que ya han ocurrido.',
+      );
+    }
+
+    if (entrada.stock < cant) {
+      throw new BadRequestException(
+        `No hay suficientes entradas disponibles. Quedan ${entrada.stock} entradas.`,
+      );
+    }
+
+    // guardo el archivo del comprobante de transferencia
+    const fileUrl = await this.filesService.saveImage(
+      fileComprobanteTransferencia,
+    );
+
+    const montoTotal = Number(entrada.precio) * cant;
+
+    const compra = this.comprasRepository.create({
+      comprobanteTransferencia: fileUrl,
+      monto: montoTotal,
+      cliente: cliente,
+    });
+
+    const compraGuardada = await this.comprasRepository.save(compra);
+
+    await this.ticketsService.saveTickets(
+      cliente,
+      entrada,
+      compraGuardada,
+      cant,
+    );
+
+    // decremento el stock de la entrada
+    await this.eventosService.decrementarStockEntrada(idEntrada, cant);
+
+    return this.comprasRepository.findOne({
+      where: { id: compraGuardada.id },
+      relations: ['tickets', 'cliente'],
+    });
   }
 
   /**
@@ -194,6 +146,7 @@ export class ComprasService {
           entrada: { evento: { productora: { userId: productoraId } } },
         },
       },
+      relations: ['tickets', 'tickets.entrada'],
     });
 
     if (!compra) {
@@ -202,6 +155,24 @@ export class ComprasService {
 
     compra.estado = EstadoCompra.CANCELADA;
     await this.comprasRepository.save(compra);
+
+    // obtengo la cantidad de tickets por cada entrada
+    const cantidadTicketsPorEntrada: { [key: number]: number } = {};
+    compra.tickets.forEach((ticket) => {
+      const entradaId = ticket.entrada.id;
+      if (!cantidadTicketsPorEntrada[entradaId]) {
+        cantidadTicketsPorEntrada[entradaId] = 0;
+      }
+      cantidadTicketsPorEntrada[entradaId]++;
+    });
+    // actualizo el stock de cada entrada
+    for (const entradaId in cantidadTicketsPorEntrada) {
+      const cantidad = cantidadTicketsPorEntrada[entradaId];
+      await this.eventosService.incrementarStockEntrada(
+        parseInt(entradaId),
+        cantidad,
+      );
+    }
 
     await this.ticketsService.cancelarTicketsDeCompra(compra);
   }

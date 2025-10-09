@@ -59,6 +59,9 @@ export class Evento {
   @Column({ default: 0 })
   capacidad: number;
 
+  @Column({ name: 'stock_entradas', default: 0 })
+  stockEntradas: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

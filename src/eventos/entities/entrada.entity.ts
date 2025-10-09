@@ -27,6 +27,9 @@ export class Entrada {
   @Column()
   cantidad: number;
 
+  @Column({ default: 0 })
+  stock: number;
+
   @OneToMany(() => Ticket, (ticket) => ticket.entrada)
   tickets: Ticket[];
 }
