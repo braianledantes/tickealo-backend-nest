@@ -34,12 +34,4 @@ export class RegisterProductoraDto extends RegisterUserDto {
   })
   @IsString()
   telefono: string;
-
-  @ApiProperty({
-    description: 'Logo o imagen de perfil de la productora',
-    type: 'string',
-    format: 'binary',
-    required: false,
-  })
-  imagenPerfil?: Express.Multer.File;
 }

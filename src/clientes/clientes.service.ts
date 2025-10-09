@@ -42,7 +42,7 @@ export class ClientesService {
     await this.clientesRepository.save(cliente);
     return this.clientesRepository.findOneOrFail({
       where: { userId: user.id },
-      relations: ['user'],
+      relations: ['user', 'user.roles'],
     });
   }
 

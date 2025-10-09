@@ -57,7 +57,7 @@ export class ProductoraService {
     await this.productoraRepository.save(productora);
     return this.productoraRepository.findOneOrFail({
       where: { userId: user.id },
-      relations: ['user'],
+      relations: ['user', 'user.roles'],
     });
   }
 

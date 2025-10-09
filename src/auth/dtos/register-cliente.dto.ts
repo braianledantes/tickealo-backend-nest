@@ -26,12 +26,4 @@ export class RegisterClienteDto extends RegisterUserDto {
   })
   @IsString()
   telefono: string;
-
-  @ApiProperty({
-    description: 'Imagen de perfil del cliente',
-    type: 'string',
-    format: 'binary',
-    required: false,
-  })
-  imagenPerfil?: Express.Multer.File;
 }
