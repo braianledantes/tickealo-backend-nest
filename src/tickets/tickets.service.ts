@@ -1,5 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ClientesService } from 'src/clientes/clientes.service';
 import { Cliente } from 'src/clientes/entities/cliente.entity';
 import { Compra } from 'src/compras/entities/compra.entity';
 import { Entrada } from 'src/eventos/entities/entrada.entity';
@@ -13,6 +19,7 @@ export class TicketsService {
   constructor(
     @InjectRepository(Ticket)
     private readonly ticketsRepository: Repository<Ticket>,
+    private readonly clientesService: ClientesService,
   ) {}
 
   /**
@@ -74,5 +81,45 @@ export class TicketsService {
       { compra: { id: compra.id } },
       { estado: EstadoTicket.PENDIENTE_VALIDACION },
     );
+  }
+
+  /**
+   * Valida un ticket, cambiando su estado a VALIDADO si cumple con los criterios necesarios.
+   * @param userId El ID del usuario que intenta validar el ticket.
+   * @param ticketId El ID del ticket a validar.
+   */
+  async validarTicket(userId: number, ticketId: number) {
+    const user = await this.clientesService.findOneById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+    const ticket = await this.ticketsRepository.findOne({
+      where: { id: ticketId },
+      relations: [
+        'entrada',
+        'entrada.evento',
+        'entrada.evento.productora',
+        'entrada.evento.productora.validadores',
+      ],
+    });
+    if (!ticket) {
+      throw new NotFoundException('Ticket no encontrado');
+    }
+
+    const equipo = ticket.entrada.evento.productora.validadores;
+    const esValidador = equipo.some((validador) => validador.userId === userId);
+    if (!esValidador) {
+      throw new UnauthorizedException(
+        'No tienes permiso para validar este ticket',
+      );
+    }
+
+    if (ticket.estado !== EstadoTicket.PENDIENTE_VALIDACION) {
+      throw new BadRequestException(
+        'El ticket no está con el estado pendiente de validación',
+      );
+    }
+    ticket.estado = EstadoTicket.VALIDADO;
+    await this.ticketsRepository.save(ticket);
   }
 }
