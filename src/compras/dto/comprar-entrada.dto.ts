@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsPositive } from 'class-validator';
+import { IsInt, IsOptional, IsPositive } from 'class-validator';
 
 export class ComprarEntradaDto {
   @ApiProperty({
@@ -28,5 +28,6 @@ export class ComprarEntradaDto {
     type: 'string',
     format: 'binary',
   })
+  @IsOptional()
   comprobanteTransferencia?: Express.Multer.File;
 }
