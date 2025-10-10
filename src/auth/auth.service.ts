@@ -42,15 +42,9 @@ export class AuthService {
       if (!cliente) {
         throw new NotFoundException('Profile not found');
       }
-      return {
-        userType: 'cliente',
-        ...cliente,
-      };
+      return cliente;
     }
-    return {
-      userType: 'productora',
-      ...productora,
-    };
+    return productora;
   }
 
   /**

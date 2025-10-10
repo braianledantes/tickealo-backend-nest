@@ -115,7 +115,7 @@ export class ProductoraService {
   async getProfile(userId: number): Promise<Productora | null> {
     return this.productoraRepository.findOne({
       where: { userId },
-      relations: ['cuentaBancaria', 'user'],
+      relations: ['cuentaBancaria', 'user', 'user.roles'],
     });
   }
 

@@ -89,7 +89,7 @@ export class ClientesService {
   async getProfile(userId: number): Promise<Cliente | null> {
     return this.clientesRepository.findOne({
       where: { userId },
-      relations: ['user'],
+      relations: ['user', 'user.roles'],
     });
   }
 
