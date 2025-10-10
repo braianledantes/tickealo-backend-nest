@@ -46,4 +46,28 @@ export class ValidadorService {
       relations: ['cliente', 'cliente.user'],
     });
   }
+
+  /**
+   * Retrieves all events associated with the productoras linked to the validador identified by the given userId.
+   * @param userId - The userId of the validador.
+   * @returns An array of events associated with the validador's productoras.
+   * @throws NotFoundException if no validador is found with the given userId.
+   */
+  async getEventosDelValidador(userId: number) {
+    const validador = await this.validadoresRepository.findOne({
+      where: { userId },
+      relations: ['productoras', 'productoras.eventos'],
+      order: { productoras: { eventos: { inicioAt: 'ASC' } } },
+    });
+
+    if (!validador) {
+      throw new NotFoundException('Validador no encontrado');
+    }
+
+    const eventos = validador.productoras.flatMap(
+      (productora) => productora.eventos,
+    );
+
+    return eventos;
+  }
 }
