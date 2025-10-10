@@ -241,6 +241,41 @@ export class EventosService {
     };
   }
 
+  /**
+   * Devuelve un evento por su ID, incluyendo si el cliente lo sigue.
+   * @param userId ID del usuario que solicita el evento (para verificar si sigue a la productora).
+   * @param id ID del evento a buscar.
+   * @returns El evento encontrado con información de seguimiento.
+   * @throws NotFoundException si el evento no existe.
+   */
+  async findOneToCliente(userId: number, id: number) {
+    const evento = await this.eventoRepository.findOne({
+      where: { id },
+      relations: [
+        'lugar',
+        'productora',
+        'cuentaBancaria',
+        'entradas',
+        'productora.seguidores',
+      ],
+    });
+    if (!evento) {
+      throw new NotFoundException('Evento not found');
+    }
+    const isSeguido = evento.productora.seguidores.some(
+      (cliente) => cliente.userId === userId,
+    );
+
+    const { seguidores, ...productoraData } = evento.productora;
+    return {
+      ...evento,
+      productora: {
+        ...productoraData,
+        isSeguido,
+      },
+    };
+  }
+
   /** Devuelve un evento por su ID.
    * @param id ID del evento a buscar.
    * @returns El evento encontrado.

@@ -146,8 +146,11 @@ export class EventosController {
   @ApiResponse({ status: 200, description: 'Evento obtenido exitosamente' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.eventosService.findOne(id);
+  findOne(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.eventosService.findOneToCliente(userId, id);
   }
 
   @ApiOperation({
