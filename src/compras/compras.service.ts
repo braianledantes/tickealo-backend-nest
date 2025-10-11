@@ -216,7 +216,12 @@ export class ComprasService {
 
     const [result, total] = await this.comprasRepository.findAndCount({
       where: { cliente: { userId: clienteId } },
-      relations: ['tickets', 'tickets.entrada', 'tickets.entrada.evento'],
+      relations: [
+        'tickets',
+        'tickets.entrada',
+        'tickets.entrada.evento',
+        'tickets.entrada.evento.lugar',
+      ],
       order: { createdAt: 'DESC' },
       take: limit,
       skip: (page - 1) * limit,
