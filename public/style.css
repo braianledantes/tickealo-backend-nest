@@ -130,6 +130,15 @@ main {
   line-height: 1.7;
 }
 
+.frontend-link {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+
+  a {
+    color: var(--accent-color);
+  }
+}
+
 .project-info p {
   color: var(--text-secondary);
   margin-bottom: 1.5rem;
@@ -199,6 +208,13 @@ main {
 
 .documentos-list a:hover {
   color: rgba(255, 255, 255, 0.95);
+}
+
+.link-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
 }
 
 .api-link {
