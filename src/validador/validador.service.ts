@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
 import { Repository } from 'typeorm';
 import { Validador } from './entities/validador.entity';
+import { Productora } from 'src/productora/entities/productora.entity';
+import { Evento } from 'src/eventos/entities/evento.entity';
 
 @Injectable()
 export class ValidadorService {
@@ -53,10 +55,14 @@ export class ValidadorService {
    * @returns An array of events associated with the validador's productoras.
    * @throws NotFoundException if no validador is found with the given userId.
    */
-  async getEventosDelValidador(userId: number) {
+  async getEventosDelValidador(userId: number): Promise<Evento[]> {
     const validador = await this.validadoresRepository.findOne({
       where: { userId },
-      relations: ['productoras', 'productoras.eventos'],
+      relations: [
+        'productoras',
+        'productoras.eventos',
+        'productoras.eventos.productora',
+      ],
       order: { productoras: { eventos: { inicioAt: 'ASC' } } },
     });
 
@@ -69,5 +75,25 @@ export class ValidadorService {
     );
 
     return eventos;
+  }
+
+  /**
+   * Retrieves all productoras associated with the validador identified by the given userId.
+   * @param userId - The userId of the validador.
+   * @returns An array of productoras associated with the validador.
+   * @throws NotFoundException if no validador is found with the given userId.
+   */
+  async getProductorasDelValidador(userId: number): Promise<Productora[]> {
+    const validador = await this.validadoresRepository.findOne({
+      where: { userId },
+      relations: ['productoras'],
+      order: { productoras: { nombre: 'ASC' } },
+    });
+
+    if (!validador) {
+      throw new NotFoundException('Validador no encontrado');
+    }
+
+    return validador.productoras;
   }
 }

@@ -6,6 +6,7 @@ import { ValidadorService } from './validador.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiBearerAuth()
+@Roles(Role.Validador)
 @Controller('validador')
 export class ValidadorController {
   constructor(private readonly validadorService: ValidadorService) {}
@@ -25,9 +26,27 @@ export class ValidadorController {
     status: 403,
     description: 'Acceso denegado - Solo validadores',
   })
-  @Roles(Role.Validador)
   @Get('eventos')
   getEventosDelValidador(@GetUser('id') userId: number) {
     return this.validadorService.getEventosDelValidador(userId);
+  }
+
+  @ApiOperation({
+    summary: 'Obtener productoras asociadas al validador autenticado',
+    description: '🛡️ **Acceso:** Solo Validadores autenticados',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Lista de productoras asociadas al validador obtenida exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo validadores',
+  })
+  @Get('productoras')
+  getProductorasDelValidador(@GetUser('id') userId: number) {
+    return this.validadorService.getProductorasDelValidador(userId);
   }
 }
