@@ -19,10 +19,8 @@ async function bootstrap() {
     }),
   );
 
-  // Configurar servir archivos estáticos
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
+  // Configuración para servir archivos estáticos
+  app.useStaticAssets(join(__dirname, '..', 'public'));
 
   // Documentación con Swagger
   const config = new DocumentBuilder()
