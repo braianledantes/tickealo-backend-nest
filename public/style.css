@@ -10,11 +10,11 @@
   --accent-bg: #1a2332;
   --text-primary: #ffffff;
   --text-secondary: #b8c5d6;
-  --accent-color: #4a90e2;
-  --accent-hover: #357abd;
-  --border-color: #2a3441;
-  --shadow-light: rgba(74, 144, 226, 0.1);
-  --shadow-medium: rgba(74, 144, 226, 0.2);
+  --accent-color: #0260ed;
+  --accent-hover: #024bb8;
+  --border-color: #1a3a5c;
+  --shadow-light: rgba(2, 96, 237, 0.1);
+  --shadow-medium: rgba(2, 96, 237, 0.2);
 }
 
 body {
@@ -35,20 +35,22 @@ body {
 }
 
 header {
+  background: radial-gradient(ellipse at top, #160078 0%, transparent 70%);
   padding: 2rem 0;
   text-align: center;
 }
 
 .header-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .logo {
-  width: 100%;
-  max-width: 400px;
+  width: 40px;
+  max-width: 40px;
   height: auto;
 }
 
@@ -363,6 +365,7 @@ footer {
   padding: 2rem 0;
   margin-top: 2rem;
   border-top: 1px solid var(--border-color);
+  background: radial-gradient(ellipse at bottom, #160078 0%, transparent 70%);
 }
 
 .footer-content {
