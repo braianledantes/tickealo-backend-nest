@@ -86,7 +86,7 @@ export class ValidadorService {
   async getProductorasDelValidador(userId: number): Promise<Productora[]> {
     const validador = await this.validadoresRepository.findOne({
       where: { userId },
-      relations: ['productoras'],
+      relations: ['productoras', 'productoras.user'],
       order: { productoras: { nombre: 'ASC' } },
     });
 
