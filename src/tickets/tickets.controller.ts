@@ -15,8 +15,15 @@ import { TicketsService } from './tickets.service';
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
-  @ApiOperation({ summary: 'Validar un ticket por su ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID del ticket' })
+  @ApiOperation({
+    summary: 'Validar un ticket mediante su código alfanumérico',
+  })
+  @ApiParam({
+    name: 'codigoAlfanumerico',
+    type: String,
+    description: 'Código alfanumérico del ticket a validar',
+    example: '0AC 2N1',
+  })
   @ApiResponse({ status: 200, description: 'Ticket validado correctamente' })
   @ApiResponse({ status: 400, description: 'El ticket ya fue utilizado' })
   @ApiResponse({
@@ -25,11 +32,11 @@ export class TicketsController {
   })
   @ApiResponse({ status: 404, description: 'Ticket no encontrado' })
   @Roles(Role.Validador, Role.Productora)
-  @Patch(':id/validar')
+  @Patch(':codigoAlfanumerico/validar')
   validarTicket(
     @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('codigoAlfanumerico') codigoAlfanumerico: string,
   ) {
-    return this.ticketsService.validarTicket(userId, id);
+    return this.ticketsService.validarTicket(userId, codigoAlfanumerico);
   }
 }

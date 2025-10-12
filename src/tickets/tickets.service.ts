@@ -84,17 +84,20 @@ export class TicketsService {
   }
 
   /**
-   * Valida un ticket, cambiando su estado a VALIDADO si cumple con los criterios necesarios.
-   * @param userId El ID del usuario que intenta validar el ticket.
-   * @param ticketId El ID del ticket a validar.
+   * Valida un ticket específico mediante su código alfanumérico.
+   * @param userId ID del usuario que intenta validar el ticket.
+   * @param codigoAlfanumerico Código alfanumérico del ticket a validar.
+   * @throws UnauthorizedException si el usuario no tiene permiso para validar el ticket.
+   * @throws NotFoundException si el ticket no existe.
+   * @throws BadRequestException si el ticket ya fue utilizado o no está en estado pendiente de validación.
    */
-  async validarTicket(userId: number, ticketId: number) {
+  async validarTicket(userId: number, codigoAlfanumerico: string) {
     const user = await this.clientesService.findOneById(userId);
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
     const ticket = await this.ticketsRepository.findOne({
-      where: { id: ticketId },
+      where: { codigoAlfanumerico: codigoAlfanumerico },
       relations: [
         'entrada',
         'entrada.evento',
