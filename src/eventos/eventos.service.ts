@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CuentaBancariaService } from 'src/cuentabancaria/cuenta-bancaria.service';
+import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
 import { FileUploadService } from 'src/files/file-upload.service';
 import { LugaresService } from 'src/lugares/lugares.service';
 import { ProductoraService } from 'src/productora/productora.service';
@@ -14,9 +14,8 @@ import { ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateEventoDto } from './dto/create-evento.dto';
 import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
-import { Evento } from './entities/evento.entity';
 import { Entrada } from './entities/entrada.entity';
-import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
+import { Evento } from './entities/evento.entity';
 
 @Injectable()
 export class EventosService {
@@ -26,7 +25,6 @@ export class EventosService {
     @InjectRepository(Entrada)
     private readonly entradaRepository: Repository<Entrada>,
     private readonly productoraService: ProductoraService,
-    private readonly cuentaBancariaService: CuentaBancariaService,
     private readonly lugaresService: LugaresService,
     private readonly fileUploadService: FileUploadService,
   ) {}
@@ -46,9 +44,6 @@ export class EventosService {
     }
 
     const productora = await this.productoraService.findOneByUserId(userId);
-    const cuentaBancaria = await this.cuentaBancariaService.findById(
-      createEventoDto.cuentaBancariaId,
-    );
 
     if (!productora) {
       throw new UnauthorizedException('Productora not found');
@@ -73,7 +68,7 @@ export class EventosService {
       stockEntradas: capacidad,
       lugar,
       productora,
-      cuentaBancaria,
+      cuentaBancaria: productora.cuentaBancaria,
       entradas,
     });
     const eventoSaved = await this.eventoRepository.save(evento);

@@ -94,15 +94,4 @@ export class CreateEventoDto {
   @ValidateNested({ each: true })
   @Type(() => CreateEntradaDto)
   entradas: CreateEntradaDto[];
-
-  @ApiProperty({
-    example: 1,
-    description: 'ID de la cuenta bancaria asociada al evento',
-  })
-  @IsNumber({}, { message: 'El ID de cuenta bancaria debe ser un número' })
-  @IsPositive({
-    message: 'El ID de cuenta bancaria debe ser un número positivo',
-  })
-  @Type(() => Number)
-  cuentaBancariaId: number;
 }
