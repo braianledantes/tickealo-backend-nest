@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -109,12 +110,32 @@ export class TicketsService {
       throw new NotFoundException('Ticket no encontrado');
     }
 
+    if (!ticket.entrada) {
+      throw new BadRequestException('El ticket no tiene una entrada asociada');
+    }
+
+    if (!ticket.entrada.evento) {
+      throw new BadRequestException(
+        'La entrada del ticket no tiene un evento asociado',
+      );
+    }
+
+    if (!ticket.entrada.evento.productora) {
+      throw new BadRequestException(
+        'El evento de la entrada no tiene una productora asociada',
+      );
+    }
+
     const equipo = ticket.entrada.evento.productora.validadores;
     const esValidador = equipo.some((validador) => validador.userId === userId);
     if (!esValidador) {
       throw new UnauthorizedException(
         'No tienes permiso para validar este ticket',
       );
+    }
+
+    if (ticket.estado === EstadoTicket.VALIDADO) {
+      throw new BadRequestException('El ticket ya fue validado');
     }
 
     if (ticket.estado !== EstadoTicket.PENDIENTE_VALIDACION) {
