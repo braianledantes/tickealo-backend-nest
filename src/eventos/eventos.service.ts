@@ -49,6 +49,12 @@ export class EventosService {
       throw new UnauthorizedException('Productora not found');
     }
 
+    if (!productora.cuentaBancaria) {
+      throw new BadRequestException(
+        'La productora debe tener una cuenta bancaria asociada',
+      );
+    }
+
     const lugar = await this.lugaresService.upsert(createEventoDto.lugar);
 
     const capacidad =
@@ -357,7 +363,10 @@ export class EventosService {
    * @throws UnauthorizedException si el usuario no tiene permiso para eliminar el evento.
    */
   async remove(userId: number, id: number) {
-    const evento = await this.findOne(id);
+    const evento = await this.eventoRepository.findOne({
+      where: { id },
+      relations: ['productora', 'entradas', 'entradas.tickets'],
+    });
     if (!evento) {
       throw new NotFoundException('Evento not found');
     }
@@ -365,6 +374,16 @@ export class EventosService {
     if (evento.productora.userId !== userId) {
       throw new UnauthorizedException(
         'You do not have permission to delete this evento',
+      );
+    }
+
+    // Si el evento tiene tickets vendidos, no se puede eliminar
+    const hasTicketsVendidos = evento.entradas.some(
+      (entrada) => entrada.tickets && entrada.tickets.length > 0,
+    );
+    if (hasTicketsVendidos) {
+      throw new BadRequestException(
+        'No se puede eliminar un evento con tickets vendidos',
       );
     }
     await this.eventoRepository.remove(evento);
