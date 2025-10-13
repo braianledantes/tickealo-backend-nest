@@ -10,7 +10,7 @@ import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { EventosService } from 'src/eventos/eventos.service';
 import { FileUploadService } from 'src/files/file-upload.service';
 import { TicketsService } from 'src/tickets/tickets.service';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
 import { Entrada } from 'src/eventos/entities/entrada.entity';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 import { Compra } from './entities/compra.entity';
@@ -183,6 +183,10 @@ export class ComprasService {
       throw new BadRequestException('La compra no existe.');
     }
 
+    if (compra.estado !== EstadoCompra.INICIADA) {
+      throw new BadRequestException('La compra ya fue finalizada o cancelada.');
+    }
+
     const cliente = await this.clientesService.findOneById(userId);
     if (cliente.userId !== compra.cliente.userId) {
       throw new ForbiddenException(
@@ -223,6 +227,7 @@ export class ComprasService {
         tickets: {
           entrada: { evento: { productora: { userId: productoraId } } },
         },
+        estado: Not(EstadoCompra.INICIADA),
       },
       relations: [
         'cliente',
@@ -273,6 +278,12 @@ export class ComprasService {
 
       if (!compra) {
         throw new BadRequestException('La compra no existe.');
+      }
+
+      if (compra.estado !== EstadoCompra.PENDIENTE) {
+        throw new BadRequestException(
+          'La compra ya fue finalizada o cancelada.',
+        );
       }
 
       // Cambio el estado de la compra
@@ -364,6 +375,10 @@ export class ComprasService {
       throw new BadRequestException('La compra no existe.');
     }
 
+    if (compra.estado !== EstadoCompra.PENDIENTE) {
+      throw new BadRequestException('La compra ya fue finalizada o cancelada.');
+    }
+
     compra.estado = EstadoCompra.ACEPTADA;
     await this.comprasRepository.save(compra);
 
@@ -385,7 +400,10 @@ export class ComprasService {
     const { limit = 10, page = 0 } = paginationDto;
 
     const [result, total] = await this.comprasRepository.findAndCount({
-      where: { cliente: { userId: clienteId } },
+      where: {
+        cliente: { userId: clienteId },
+        estado: Not(EstadoCompra.INICIADA),
+      },
       relations: [
         'tickets',
         'tickets.entrada',
@@ -419,12 +437,17 @@ export class ComprasService {
   async getCompra(userId: number, compraId: number): Promise<Compra> {
     const compra = await this.comprasRepository.findOne({
       where: [
-        { id: compraId, cliente: { userId } },
+        {
+          id: compraId,
+          cliente: { userId },
+          estado: Not(EstadoCompra.INICIADA),
+        },
         {
           id: compraId,
           tickets: {
             entrada: { evento: { productora: { userId } } },
           },
+          estado: Not(EstadoCompra.INICIADA),
         },
       ],
       relations: [
