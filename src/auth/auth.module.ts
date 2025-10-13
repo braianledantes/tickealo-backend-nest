@@ -8,9 +8,13 @@ import { MailModule } from 'src/mail/mail.module';
 import { ProductoraModule } from 'src/productora/productora.module';
 import { UsersModule } from 'src/users/users.module';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { AuthEmailService } from './services/auth-email.service';
+import { AuthLoginService } from './services/auth-login.service';
+import { AuthProfileService } from './services/auth-profile.service';
+import { AuthRegisterService } from './services/auth-register.service';
+import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
@@ -33,6 +37,10 @@ import { LocalStrategy } from './strategies/local.strategy';
   ],
   providers: [
     AuthService,
+    AuthLoginService,
+    AuthRegisterService,
+    AuthEmailService,
+    AuthProfileService,
     LocalStrategy,
     JwtStrategy,
     {

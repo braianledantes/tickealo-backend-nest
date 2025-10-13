@@ -23,22 +23,32 @@ import {
 } from '@nestjs/swagger';
 import { User } from 'src/users/entities/user.entity';
 import { ImageFileValidationPipe } from '../files/pipes/image-file-validation.pipe';
-import { AuthService } from './auth.service';
 import { GetUser } from './decorators/get-user.decorator';
 import { Public } from './decorators/public.decorator';
+import { Roles } from './decorators/roles.decorator';
+import { LoginDto } from './dtos/login.dto';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
 import { RegisterProductoraDto } from './dtos/register-productora.dto';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { UpdateProductoraDto } from './dtos/update-productora.dto';
 import { UpdateClienteDto } from './dtos/update-cliente.dto';
-import { Roles } from './decorators/roles.decorator';
+import { UpdateProductoraDto } from './dtos/update-productora.dto';
 import { Role } from './enums/role.enum';
-import { LoginDto } from './dtos/login.dto';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { AuthEmailService } from './services/auth-email.service';
+import { AuthLoginService } from './services/auth-login.service';
+import { AuthProfileService } from './services/auth-profile.service';
+import { AuthRegisterService } from './services/auth-register.service';
+import { AuthService } from './services/auth.service';
 
 @ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly authEmailService: AuthEmailService,
+    private readonly authLoginService: AuthLoginService,
+    private readonly authRegisterService: AuthRegisterService,
+    private readonly authProfileService: AuthProfileService,
+  ) {}
 
   @ApiOperation({
     summary: 'Iniciar sesión usuario general',
@@ -61,7 +71,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@GetUser() user: User) {
-    return this.authService.login(user);
+    return this.authLoginService.login(user);
   }
 
   @ApiOperation({
@@ -76,7 +86,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login-productora')
   async loginProductora(@GetUser() user: User) {
-    return this.authService.loginProductora(user);
+    return this.authLoginService.loginProductora(user);
   }
 
   @ApiOperation({
@@ -91,7 +101,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login-cliente')
   async loginCliente(@GetUser() user: User) {
-    return this.authService.loginCliente(user);
+    return this.authLoginService.loginCliente(user);
   }
 
   @ApiOperation({
@@ -106,7 +116,7 @@ export class AuthController {
   @ApiBearerAuth()
   @Get('me')
   getProfile(@GetUser('id') userId: number) {
-    return this.authService.getProfile(userId);
+    return this.authProfileService.getProfile(userId);
   }
 
   @ApiOperation({
@@ -134,7 +144,7 @@ export class AuthController {
     @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
-    return this.authService.updateProductora(userId, updateData, file);
+    return this.authProfileService.updateProductora(userId, updateData, file);
   }
 
   @ApiOperation({
@@ -159,7 +169,7 @@ export class AuthController {
     @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
-    return this.authService.updateCliente(userId, updateData, file);
+    return this.authProfileService.updateCliente(userId, updateData, file);
   }
 
   @ApiOperation({
@@ -182,7 +192,10 @@ export class AuthController {
     @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
-    return this.authService.registerProductora(registerProductoraDto, file);
+    return this.authRegisterService.registerProductora(
+      registerProductoraDto,
+      file,
+    );
   }
 
   @ApiOperation({
@@ -202,7 +215,7 @@ export class AuthController {
     @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
-    return this.authService.registerCliente(registerClienteDto, file);
+    return this.authRegisterService.registerCliente(registerClienteDto, file);
   }
 
   @ApiOperation({
@@ -215,6 +228,6 @@ export class AuthController {
   @Public()
   @Get('verify-email')
   verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
+    return this.authEmailService.verifyEmail(token);
   }
 }
