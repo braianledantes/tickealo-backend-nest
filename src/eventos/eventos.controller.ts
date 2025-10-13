@@ -31,13 +31,17 @@ import { MultipleImageFileValidationPipe } from 'src/files/pipes/multiple-image-
 import { CreateEventoDto } from './dto/create-evento.dto';
 import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
-import { EventosService } from './eventos.service';
+import { EventosClienteService } from './services/eventos-cliente.service';
+import { EventosProductoraService } from './services/eventos-productora.service';
 
 @ApiTags('Eventos')
 @ApiBearerAuth()
 @Controller('eventos')
 export class EventosController {
-  constructor(private readonly eventosService: EventosService) {}
+  constructor(
+    private readonly eventosClienteService: EventosClienteService,
+    private readonly eventosProductoraService: EventosProductoraService,
+  ) {}
 
   @ApiOperation({
     summary: 'Crear un nuevo evento',
@@ -57,7 +61,7 @@ export class EventosController {
     @GetUser('id') userId: number,
     @Body() createEventoDto: CreateEventoDto,
   ) {
-    return this.eventosService.create(userId, createEventoDto);
+    return this.eventosProductoraService.create(userId, createEventoDto);
   }
 
   @ApiOperation({
@@ -68,9 +72,10 @@ export class EventosController {
     status: 200,
     description: 'Lista de eventos próximos obtenida exitosamente',
   })
+  @Roles(Role.Cliente)
   @Get('proximos')
   findUpcoming() {
-    return this.eventosService.findUpcoming();
+    return this.eventosClienteService.findUpcoming();
   }
 
   @ApiOperation({
@@ -121,7 +126,7 @@ export class EventosController {
     @UploadedFiles(new MultipleImageFileValidationPipe())
     files: { portada?: Express.Multer.File[]; banner?: Express.Multer.File[] },
   ) {
-    return this.eventosService.updateImagenes(userId, id, files);
+    return this.eventosProductoraService.updateImagenes(userId, id, files);
   }
 
   @ApiOperation({
@@ -133,9 +138,10 @@ export class EventosController {
     status: 200,
     description: 'Lista paginada de eventos obtenida exitosamente',
   })
+  @Roles(Role.Cliente)
   @Get()
   findAll(@Query() findEventosDto: FindEventosDto) {
-    return this.eventosService.findAllPaginated(findEventosDto);
+    return this.eventosClienteService.findAllPaginated(findEventosDto);
   }
 
   @ApiOperation({
@@ -145,12 +151,13 @@ export class EventosController {
   @ApiParam({ name: 'id', description: 'ID del evento' })
   @ApiResponse({ status: 200, description: 'Evento obtenido exitosamente' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  @Roles(Role.Cliente)
   @Get(':id')
   findOne(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.eventosService.findOneToCliente(userId, id);
+    return this.eventosClienteService.findOne(userId, id);
   }
 
   @ApiOperation({
@@ -175,7 +182,7 @@ export class EventosController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEventoDto: UpdateEventoDto,
   ) {
-    return this.eventosService.update(userId, id, updateEventoDto);
+    return this.eventosProductoraService.update(userId, id, updateEventoDto);
   }
 
   @ApiOperation({
@@ -195,6 +202,6 @@ export class EventosController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id: number) {
-    return this.eventosService.remove(userId, id);
+    return this.eventosProductoraService.remove(userId, id);
   }
 }

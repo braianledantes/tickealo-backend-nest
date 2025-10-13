@@ -5,35 +5,22 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
 import { FileUploadService } from 'src/files/file-upload.service';
 import { LugaresService } from 'src/lugares/lugares.service';
 import { ProductoraService } from 'src/productora/productora.service';
-import { checkWithinArea } from 'src/utils/filters';
-import {
-  DataSource,
-  ILike,
-  LessThanOrEqual,
-  MoreThanOrEqual,
-  Repository,
-} from 'typeorm';
-import { CreateEventoDto } from './dto/create-evento.dto';
-import { FindEventosDto } from './dto/find-eventos.dto';
-import { UpdateEventoDto } from './dto/update-evento.dto';
-import { Entrada } from './entities/entrada.entity';
-import { Evento } from './entities/evento.entity';
+import { Repository } from 'typeorm';
+import { CreateEventoDto } from '../dto/create-evento.dto';
+import { UpdateEventoDto } from '../dto/update-evento.dto';
+import { Evento } from '../entities/evento.entity';
 
 @Injectable()
-export class EventosService {
+export class EventosProductoraService {
   constructor(
     @InjectRepository(Evento)
     private readonly eventoRepository: Repository<Evento>,
-    @InjectRepository(Entrada)
-    private readonly entradaRepository: Repository<Entrada>,
     private readonly productoraService: ProductoraService,
     private readonly lugaresService: LugaresService,
     private readonly fileUploadService: FileUploadService,
-    private readonly dataSource: DataSource,
   ) {}
 
   /** Crea un nuevo evento asociado a la productora del usuario.
@@ -114,7 +101,10 @@ export class EventosService {
       throw new UnauthorizedException('Productora not found');
     }
 
-    const evento = await this.findOne(id);
+    const evento = await this.eventoRepository.findOne({
+      where: { id },
+      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
+    });
     if (!evento) {
       throw new NotFoundException('Evento not found');
     }
@@ -139,188 +129,15 @@ export class EventosService {
 
     Object.assign(evento, { portadaUrl, bannerUrl });
     await this.eventoRepository.save(evento);
-    return this.findOne(id);
-  }
 
-  /**
-   * Devuelve una lista paginada de eventos, con soporte para búsqueda y ordenación.
-   * @param findEventosDto Parámetros de búsqueda, paginación y ordenación.
-   * @returns Un objeto con los eventos paginados y metadatos.
-   */
-  async findAllPaginated(
-    findEventosDto: FindEventosDto,
-  ): Promise<PaginatioResponseDto<Evento>> {
-    const {
-      search,
-      page,
-      limit,
-      orderDir,
-      fechaInicio,
-      fechaFin,
-      latitud,
-      longitud,
-      radioKm,
-    } = findEventosDto;
-
-    // Construir las condiciones de búsqueda por texto
-    const textSearchConditions = search
-      ? [
-          { nombre: ILike(`%${search}%`) },
-          { descripcion: ILike(`%${search}%`) },
-        ]
-      : undefined;
-
-    // Construir las condiciones de fecha
-    const dateConditions: Record<string, any> = {};
-    if (fechaInicio && fechaFin) {
-      // Eventos que se superponen con el rango de fechas
-      dateConditions.inicioAt = LessThanOrEqual(fechaFin);
-      dateConditions.finAt = MoreThanOrEqual(fechaInicio);
-    } else if (fechaInicio) {
-      // Eventos que terminan después de la fecha de inicio
-      dateConditions.finAt = MoreThanOrEqual(fechaInicio);
-    } else if (fechaFin) {
-      // Eventos que empiezan antes de la fecha de fin
-      dateConditions.inicioAt = LessThanOrEqual(fechaFin);
-    }
-
-    // Combinar condiciones de texto y fecha
-    let whereConditions: any;
-    if (textSearchConditions && Object.keys(dateConditions).length > 0) {
-      // Si hay búsqueda por texto y filtros de fecha, combinar ambos
-      whereConditions = textSearchConditions.map((condition) => ({
-        ...condition,
-        ...dateConditions,
-      }));
-    } else if (textSearchConditions) {
-      // Solo búsqueda por texto
-      whereConditions = textSearchConditions;
-    } else if (Object.keys(dateConditions).length > 0) {
-      // Solo filtros de fecha
-      whereConditions = dateConditions;
-    } else {
-      // Sin filtros
-      whereConditions = {};
-    }
-
-    const [result, total] = await this.eventoRepository.findAndCount({
-      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
-      skip: (page - 1) * limit,
-      take: limit,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      where: whereConditions,
-      order: { nombre: orderDir },
-    });
-
-    // Aplicar filtro de ubicación geográfica si se proporcionan coordenadas
-    let filteredResult = result;
-    if (
-      latitud !== undefined &&
-      longitud !== undefined &&
-      radioKm !== undefined
-    ) {
-      filteredResult = result.filter((evento) =>
-        checkWithinArea(
-          { latitud: evento.lugar.latitud, longitud: evento.lugar.longitud },
-          latitud,
-          longitud,
-          radioKm,
-        ),
-      );
-    }
-
-    // Nota: El filtro geográfico se aplica después de la consulta DB,
-    // por lo que el total puede no ser exacto para la paginación
-    const hasGeographicFilter =
-      latitud !== undefined && longitud !== undefined && radioKm !== undefined;
-
-    const finalTotal = hasGeographicFilter ? filteredResult.length : total;
-
-    return {
-      data: filteredResult,
-      pagination: {
-        total: finalTotal,
-        page,
-        hasNextPage: hasGeographicFilter
-          ? filteredResult.length > page * limit
-          : total > page * limit,
-        hasPreviousPage: page > 1,
-      },
-    };
-  }
-
-  /**
-   * Devuelve un evento por su ID, incluyendo si el cliente lo sigue.
-   * @param userId ID del usuario que solicita el evento (para verificar si sigue a la productora).
-   * @param id ID del evento a buscar.
-   * @returns El evento encontrado con información de seguimiento.
-   * @throws NotFoundException si el evento no existe.
-   */
-  async findOneToCliente(userId: number, id: number) {
-    const evento = await this.eventoRepository.findOne({
-      where: { id },
-      relations: [
-        'lugar',
-        'productora',
-        'cuentaBancaria',
-        'entradas',
-        'productora.seguidores',
-      ],
-    });
-    if (!evento) {
-      throw new NotFoundException('Evento not found');
-    }
-    const isSeguido = evento.productora.seguidores.some(
-      (cliente) => cliente.userId === userId,
-    );
-
-    const { seguidores, ...productoraData } = evento.productora;
-    return {
-      ...evento,
-      productora: {
-        ...productoraData,
-        isSeguido,
-      },
-    };
-  }
-
-  /** Devuelve un evento por su ID.
-   * @param id ID del evento a buscar.
-   * @returns El evento encontrado.
-   * @throws NotFoundException si el evento no existe.
-   */
-  async findOne(id: number) {
-    const evento = await this.eventoRepository.findOne({
+    const eventoActualizado = await this.eventoRepository.findOne({
       where: { id },
       relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
     });
-    if (!evento) {
+    if (!eventoActualizado) {
       throw new NotFoundException('Evento not found');
     }
-    return evento;
-  }
-
-  /**
-   * Devuelve una entrada por su ID.
-   * @param id ID de la entrada a buscar.
-   * @returns La entrada encontrada.
-   * @throws NotFoundException si la entrada no existe.
-   */
-  async findEntradaById(id: number): Promise<Entrada> {
-    const entrada = await this.entradaRepository.findOne({
-      where: { id },
-      relations: [
-        'evento',
-        'evento.lugar',
-        'evento.productora',
-        'evento.cuentaBancaria',
-        'tickets',
-      ],
-    });
-    if (!entrada) {
-      throw new NotFoundException('Entrada not found');
-    }
-    return entrada;
+    return eventoActualizado;
   }
 
   /** Actualiza un evento existente.
@@ -363,7 +180,15 @@ export class EventosService {
 
     Object.assign(evento, updateEventoDto);
     await this.eventoRepository.save(evento);
-    return this.findOne(id);
+
+    const eventoActualizado = await this.eventoRepository.findOne({
+      where: { id },
+      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
+    });
+    if (!eventoActualizado) {
+      throw new NotFoundException('Evento not found');
+    }
+    return eventoActualizado;
   }
 
   /** Elimina un evento por su ID.
@@ -397,20 +222,5 @@ export class EventosService {
       );
     }
     await this.eventoRepository.remove(evento);
-  }
-
-  /**
-   * Devuelve los eventos cuya fecha de inicio es posterior a la fecha actual.
-   * Ordenados de más próximos a más lejanos.
-   * @returns Lista de eventos futuros.
-   */
-  async findUpcoming() {
-    const now = new Date();
-
-    return this.eventoRepository.find({
-      where: { inicioAt: MoreThanOrEqual(now) },
-      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
-      order: { inicioAt: 'ASC' },
-    });
   }
 }

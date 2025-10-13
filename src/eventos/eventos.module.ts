@@ -7,7 +7,8 @@ import { ProductoraModule } from 'src/productora/productora.module';
 import { Entrada } from './entities/entrada.entity';
 import { Evento } from './entities/evento.entity';
 import { EventosController } from './eventos.controller';
-import { EventosService } from './eventos.service';
+import { EventosClienteService } from './services/eventos-cliente.service';
+import { EventosProductoraService } from './services/eventos-productora.service';
 
 @Module({
   imports: [
@@ -18,7 +19,6 @@ import { EventosService } from './eventos.service';
     FilesModule,
   ],
   controllers: [EventosController],
-  providers: [EventosService],
-  exports: [EventosService],
+  providers: [EventosProductoraService, EventosClienteService],
 })
 export class EventosModule {}
