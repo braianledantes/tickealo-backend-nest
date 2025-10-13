@@ -16,13 +16,19 @@ import {
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
-import { ProductoraService } from './productora.service';
+import { ProductoraEquipoService } from './services/productora-equipo.service';
+import { ProductoraEventosService } from './services/productora-eventos.service';
+import { ProductoraSeguidoresService } from './services/productora-seguidores.service';
 
 @ApiTags('Productoras')
 @ApiBearerAuth()
 @Controller('productora')
 export class ProductoraController {
-  constructor(private readonly productoraService: ProductoraService) {}
+  constructor(
+    private readonly productoraEventosService: ProductoraEventosService,
+    private readonly productoraEquipoService: ProductoraEquipoService,
+    private readonly productoraSeguidoresService: ProductoraSeguidoresService,
+  ) {}
 
   @ApiOperation({
     summary: 'Obtener eventos de la productora autenticada',
@@ -40,7 +46,7 @@ export class ProductoraController {
   @Roles(Role.Productora)
   @Get('eventos')
   getAllEventos(@GetUser('id') idProductora: number) {
-    return this.productoraService.getEventosProductora(idProductora);
+    return this.productoraEventosService.getEventosProductora(idProductora);
   }
 
   @ApiOperation({
@@ -55,7 +61,7 @@ export class ProductoraController {
   @ApiResponse({ status: 404, description: 'Productora no encontrada' })
   @Get(':id/eventos')
   getEventos(@Param('id', ParseIntPipe) idProductora: number) {
-    return this.productoraService.getEventosProductora(idProductora);
+    return this.productoraEventosService.getEventosProductora(idProductora);
   }
 
   @ApiOperation({
@@ -74,7 +80,7 @@ export class ProductoraController {
   @Roles(Role.Productora)
   @Get('equipo')
   getEquipo(@GetUser('id') idProductora: number) {
-    return this.productoraService.getEquipo(idProductora);
+    return this.productoraEquipoService.getEquipo(idProductora);
   }
 
   @ApiOperation({
@@ -108,7 +114,7 @@ export class ProductoraController {
     @GetUser('id') id: number,
     @Param('userEmail') userEmail: string,
   ) {
-    return this.productoraService.addMiembroEquipo(id, userEmail);
+    return this.productoraEquipoService.addMiembroEquipo(id, userEmail);
   }
 
   @ApiOperation({
@@ -142,7 +148,7 @@ export class ProductoraController {
     @GetUser('id') id: number,
     @Param('userEmail') userEmail: string,
   ) {
-    return this.productoraService.removeMiembroEquipo(id, userEmail);
+    return this.productoraEquipoService.removeMiembroEquipo(id, userEmail);
   }
 
   @ApiOperation({
@@ -161,7 +167,7 @@ export class ProductoraController {
   @Roles(Role.Productora)
   @Get('seguidores')
   getSeguidores(@GetUser('id') idProductora: number) {
-    return this.productoraService.getSeguidores(idProductora);
+    return this.productoraSeguidoresService.getSeguidores(idProductora);
   }
 
   @ApiOperation({
@@ -183,7 +189,10 @@ export class ProductoraController {
     @GetUser('id') idCliente: number,
     @Param('idProductora', ParseIntPipe) idProductora: number,
   ) {
-    return this.productoraService.seguirProductora(idCliente, idProductora);
+    return this.productoraSeguidoresService.seguirProductora(
+      idCliente,
+      idProductora,
+    );
   }
 
   @ApiOperation({
@@ -210,7 +219,7 @@ export class ProductoraController {
     @GetUser('id') idCliente: number,
     @Param('idProductora', ParseIntPipe) idProductora: number,
   ) {
-    return this.productoraService.dejarDeSeguirProductora(
+    return this.productoraSeguidoresService.dejarDeSeguirProductora(
       idCliente,
       idProductora,
     );

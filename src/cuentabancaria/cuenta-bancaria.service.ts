@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProductoraService } from 'src/productora/productora.service';
+import { ProductoraService } from 'src/productora/services/productora.service';
 import { Repository } from 'typeorm';
 import { CreateCuentaBancariaDto } from './dto/create-cuenta-bancaria.dto';
 import { UpdateCuentaBancariaDto } from './dto/update-cuenta-bancaria.dto';

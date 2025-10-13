@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ClientesService } from 'src/clientes/clientes.service';
 import { FileUploadService } from 'src/files/file-upload.service';
 import { MailService } from 'src/mail/mail.service';
-import { ProductoraService } from 'src/productora/productora.service';
+import { ProductoraService } from 'src/productora/services/productora.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { RegisterClienteDto } from './dtos/register-cliente.dto';
