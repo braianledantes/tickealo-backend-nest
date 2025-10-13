@@ -7,17 +7,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
 import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
 import { PaginationDto } from 'src/commun/dto/pagination.dto';
-import { EventosService } from 'src/eventos/eventos.service';
-import { FileUploadService } from 'src/files/file-upload.service';
-import { TicketsService } from 'src/tickets/tickets.service';
-import { DataSource, Not, Repository } from 'typeorm';
 import { Entrada } from 'src/eventos/entities/entrada.entity';
+import { FileUploadService } from 'src/files/file-upload.service';
+import { Ticket } from 'src/tickets/entities/ticket.entity';
+import { EstadoTicket } from 'src/tickets/enums/estado-ticket.enum';
+import { TicketsService } from 'src/tickets/tickets.service';
+import { generarSiguienteCodigoAlfanumerico } from 'src/utils/codigos';
+import { DataSource, Not, Repository } from 'typeorm';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 import { Compra } from './entities/compra.entity';
 import { EstadoCompra } from './enums/estado-compra.enum';
-import { EstadoTicket } from 'src/tickets/enums/estado-ticket.enum';
-import { generarSiguienteCodigoAlfanumerico } from 'src/utils/codigos';
-import { Ticket } from 'src/tickets/entities/ticket.entity';
 
 @Injectable()
 export class ComprasService {
