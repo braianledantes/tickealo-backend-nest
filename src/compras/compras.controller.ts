@@ -27,14 +27,20 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { ImageFileValidationPipe } from 'src/files/pipes/image-file-validation.pipe';
-import { ComprasService } from './compras.service';
+import { ComprasService } from './services/compras.service';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
+import { ComprasClienteService } from './services/compras-cliente.service';
+import { ComprasProductoraService } from './services/compras-productora.service';
 
 @ApiTags('Compras')
 @ApiBearerAuth()
 @Controller('compras')
 export class ComprasController {
-  constructor(private readonly comprasService: ComprasService) {}
+  constructor(
+    private readonly comprasService: ComprasService,
+    private readonly comprasClienteService: ComprasClienteService,
+    private readonly comprasProductoraService: ComprasProductoraService,
+  ) {}
 
   @ApiOperation({ summary: 'Iniciar el proceso de compra de entradas' })
   @ApiBody({ type: ComprarEntradaDto })
@@ -60,7 +66,10 @@ export class ComprasController {
     @GetUser('id') userId: number,
     @Body() comprarEntradaDto: ComprarEntradaDto,
   ) {
-    return this.comprasService.iniciarComprarEntrada(userId, comprarEntradaDto);
+    return this.comprasClienteService.iniciarComprarEntrada(
+      userId,
+      comprarEntradaDto,
+    );
   }
 
   @ApiOperation({
@@ -91,7 +100,11 @@ export class ComprasController {
     @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
-    return this.comprasService.finalizarCompraEntrada(userId, compraId, file);
+    return this.comprasClienteService.finalizarCompraEntrada(
+      userId,
+      compraId,
+      file,
+    );
   }
 
   @ApiOperation({
@@ -113,7 +126,10 @@ export class ComprasController {
     @GetUser('id') userId: number,
     @Query() paginationDto: PaginationDto,
   ) {
-    return this.comprasService.getComprasDeMisEventos(userId, paginationDto);
+    return this.comprasProductoraService.getComprasDeMisEventos(
+      userId,
+      paginationDto,
+    );
   }
 
   @ApiOperation({ summary: 'Cancelar una compra' })
@@ -131,7 +147,7 @@ export class ComprasController {
     @GetUser('id') userId: number,
     @Param('compraId', ParseIntPipe) compraId: number,
   ) {
-    return this.comprasService.rechazarCompra(userId, compraId);
+    return this.comprasProductoraService.rechazarCompra(userId, compraId);
   }
 
   @ApiOperation({ summary: 'Aceptar una compra' })
@@ -149,7 +165,7 @@ export class ComprasController {
     @GetUser('id') userId: number,
     @Param('compraId', ParseIntPipe) compraId: number,
   ) {
-    await this.comprasService.aceptarCompra(userId, compraId);
+    await this.comprasProductoraService.aceptarCompra(userId, compraId);
   }
 
   @ApiOperation({ summary: 'Obtener compras del cliente autenticado' })
@@ -166,7 +182,10 @@ export class ComprasController {
     @GetUser('id') userId: number,
     @Query() paginationDto: PaginationDto,
   ) {
-    return this.comprasService.getComprasDeCliente(userId, paginationDto);
+    return this.comprasClienteService.getComprasDeCliente(
+      userId,
+      paginationDto,
+    );
   }
 
   @ApiOperation({ summary: 'Obtener detalles de una compra específica' })

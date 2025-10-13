@@ -3,8 +3,8 @@ import { Cron } from '@nestjs/schedule';
 import { Entrada } from 'src/eventos/entities/entrada.entity';
 import { Ticket } from 'src/tickets/entities/ticket.entity';
 import { DataSource, In, LessThan } from 'typeorm';
-import { Compra } from './entities/compra.entity';
-import { EstadoCompra } from './enums/estado-compra.enum';
+import { Compra } from '../entities/compra.entity';
+import { EstadoCompra } from '../enums/estado-compra.enum';
 
 @Injectable()
 export class JobsComprasService {
