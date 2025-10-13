@@ -151,7 +151,6 @@ export class EventosController {
   @ApiParam({ name: 'id', description: 'ID del evento' })
   @ApiResponse({ status: 200, description: 'Evento obtenido exitosamente' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
-  @Roles(Role.Cliente)
   @Get(':id')
   findOne(
     @GetUser('id') userId: number,
