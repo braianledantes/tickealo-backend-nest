@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   UploadedFile,
   UseInterceptors,
@@ -35,24 +36,25 @@ import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 export class ComprasController {
   constructor(private readonly comprasService: ComprasService) {}
 
-  @ApiOperation({ summary: 'Comprar entrada para un evento' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: ComprarEntradaDto })
-  @ApiResponse({ status: 201, description: 'Compra realizada exitosamente' })
-  @ApiResponse({ status: 400, description: 'Datos de compra inválidos' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({ status: 403, description: 'Acceso denegado - Solo clientes' })
-  @ApiResponse({ status: 404, description: 'Evento o entrada no encontrada' })
   @Roles(Role.Cliente)
-  @Post('comprar-entrada')
-  @UseInterceptors(FileInterceptor('comprobanteTransferencia'))
-  comprarEntrada(
+  @Post('iniciar-compra-entrada')
+  iniciarComprarEntrada(
     @GetUser('id') userId: number,
     @Body() comprarEntradaDto: ComprarEntradaDto,
+  ) {
+    return this.comprasService.iniciarComprarEntrada(userId, comprarEntradaDto);
+  }
+
+  @Roles(Role.Cliente)
+  @Put(':compraId/finalizar-compra-entrada')
+  @UseInterceptors(FileInterceptor('comprobanteTransferencia'))
+  finalizarComprarEntrada(
+    @GetUser('id') userId: number,
+    @Param('compraId', ParseIntPipe) compraId: number,
     @UploadedFile(new ImageFileValidationPipe())
     file?: Express.Multer.File,
   ) {
-    return this.comprasService.comprarEntrada(userId, comprarEntradaDto, file);
+    return this.comprasService.finalizarCompraEntrada(userId, compraId, file);
   }
 
   @ApiOperation({
@@ -92,7 +94,7 @@ export class ComprasController {
     @GetUser('id') userId: number,
     @Param('compraId', ParseIntPipe) compraId: number,
   ) {
-    return this.comprasService.cancelarCompra(userId, compraId);
+    return this.comprasService.rechazarCompra(userId, compraId);
   }
 
   @ApiOperation({ summary: 'Aceptar una compra' })

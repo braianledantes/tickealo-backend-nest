@@ -33,7 +33,7 @@ export class Ticket {
   @Column({
     type: 'enum',
     enum: EstadoTicket,
-    default: EstadoTicket.COMPRA_PENDIENTE,
+    default: EstadoTicket.INICIADO,
   })
   estado: EstadoTicket;
 

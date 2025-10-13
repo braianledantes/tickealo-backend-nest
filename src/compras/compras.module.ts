@@ -7,6 +7,7 @@ import { EventosModule } from 'src/eventos/eventos.module';
 import { FilesModule } from 'src/files/files.module';
 import { TicketsModule } from 'src/tickets/tickets.module';
 import { ClientesModule } from 'src/clientes/clientes.module';
+import { JobsComprasService } from './jobs-compras.service';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { ClientesModule } from 'src/clientes/clientes.module';
     FilesModule,
   ],
   controllers: [ComprasController],
-  providers: [ComprasService],
+  providers: [ComprasService, JobsComprasService],
 })
 export class ComprasModule {}

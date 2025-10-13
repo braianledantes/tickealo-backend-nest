@@ -10,7 +10,13 @@ import { FileUploadService } from 'src/files/file-upload.service';
 import { LugaresService } from 'src/lugares/lugares.service';
 import { ProductoraService } from 'src/productora/productora.service';
 import { checkWithinArea } from 'src/utils/filters';
-import { ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import {
+  DataSource,
+  ILike,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { CreateEventoDto } from './dto/create-evento.dto';
 import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
@@ -27,6 +33,7 @@ export class EventosService {
     private readonly productoraService: ProductoraService,
     private readonly lugaresService: LugaresService,
     private readonly fileUploadService: FileUploadService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /** Crea un nuevo evento asociado a la productora del usuario.
@@ -335,7 +342,10 @@ export class EventosService {
       );
     }
 
-    const evento = await this.findOne(id);
+    const evento = await this.eventoRepository.findOne({
+      where: { id },
+      relations: ['productora'],
+    });
     if (!evento) {
       throw new NotFoundException('Evento not found');
     }
@@ -402,63 +412,5 @@ export class EventosService {
       relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
       order: { inicioAt: 'ASC' },
     });
-  }
-
-  /**
-   * Incrementa el stock disponible de una entrada y actualiza el stock del evento asociado.
-   * @param entradaId ID de la entrada a actualizar.
-   * @param cantidad Cantidad a incrementar.
-   * @throws NotFoundException si la entrada no existe.
-   */
-  async incrementarStockEntrada(entradaId: number, cantidad: number) {
-    const entrada = await this.entradaRepository.findOne({
-      where: { id: entradaId },
-      relations: ['evento'],
-    });
-    if (!entrada) {
-      throw new NotFoundException('Entrada not found');
-    }
-    entrada.stock += cantidad;
-    if (entrada.stock > entrada.cantidad) {
-      entrada.stock = entrada.cantidad; // No puede exceder la cantidad inicial
-    }
-    await this.entradaRepository.save(entrada);
-
-    // Actualiza el stock de entradas del evento
-    const evento = entrada.evento;
-    evento.stockEntradas += cantidad;
-    if (evento.stockEntradas > evento.capacidad) {
-      evento.stockEntradas = evento.capacidad; // No puede exceder la capacidad del evento
-    }
-    await this.eventoRepository.save(evento);
-  }
-
-  /**
-   * Decrementa el stock disponible de una entrada y actualiza el stock del evento asociado.
-   * @param entradaId ID de la entrada a actualizar.
-   * @param cantidad Cantidad a decrementar.
-   * @throws NotFoundException si la entrada no existe.
-   * @throws BadRequestException si no hay suficiente stock disponible.
-   */
-  async decrementarStockEntrada(entradaId: number, cantidad: number) {
-    const entrada = await this.entradaRepository.findOne({
-      where: { id: entradaId },
-      relations: ['evento'],
-    });
-    if (!entrada) {
-      throw new NotFoundException('Entrada not found');
-    }
-    if (entrada.stock < cantidad) {
-      throw new BadRequestException('No hay suficiente stock disponible');
-    }
-    entrada.stock -= cantidad;
-    await this.entradaRepository.save(entrada);
-    // Actualiza el stock de entradas del evento
-    const evento = entrada.evento;
-    evento.stockEntradas -= cantidad;
-    if (evento.stockEntradas < 0) {
-      evento.stockEntradas = 0; // No puede ser negativo
-    }
-    await this.eventoRepository.save(evento);
   }
 }

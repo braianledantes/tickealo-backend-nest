@@ -7,7 +7,7 @@ import {
 
 /**
  * Pipe personalizado para validación de archivos de imagen.
- * Valida que el archivo sea una imagen (jpg, jpeg, png, gif) y tenga un tamaño máximo de 1MB.
+ * Valida que el archivo sea una imagen (jpg, jpeg, png, gif).
  * El archivo es opcional (fileIsRequired: false).
  */
 @Injectable()
@@ -15,9 +15,6 @@ export class ImageFileValidationPipe implements PipeTransform {
   private readonly parseFilePipe = new ParseFilePipeBuilder()
     .addFileTypeValidator({
       fileType: /(jpg|jpeg|png|gif)$/i,
-    })
-    .addMaxSizeValidator({
-      maxSize: 1024 * 1024, // 1MB
     })
     .build({
       fileIsRequired: false,

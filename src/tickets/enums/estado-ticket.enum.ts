@@ -1,21 +1,22 @@
 export enum EstadoTicket {
   /**
-   * El ticket ha sido comprado pero aún no ha confirmado la compra.
-   * El cliente debe subir el comprobante de transferencia para que la compra
-   * pueda ser validada por el sistema.
+   * El ticket ha sido creado y la compra está en proceso.
+   */
+  INICIADO = 'INICIADO',
+  /**
+   * La compra está pendiente de revisión.
    */
   COMPRA_PENDIENTE = 'COMPRA_PENDIENTE',
   /**
-   * El ticket ha sido cancelado por la productora.
-   */
-  COMPRA_CANCELADO = 'COMPRA_CANCELADO',
-  /**
-   * El ticket ha sido comprado y el cliente ha subido el comprobante de transferencia.
-   * Puede ser validado por un validator.
+   * La compra ha sido aceptada y el ticket está pendiente de validación.
    */
   PENDIENTE_VALIDACION = 'PENDIENTE_VALIDACION',
   /**
-   * El ticket ha sido validado por un validator.
+   * El ticket ha sido validado y es válido para el evento.
    */
   VALIDADO = 'VALIDADO',
+  /**
+   * El ticket ha sido rechazado o la compra cancelada.
+   */
+  RECHAZADO = 'RECHAZADO',
 }

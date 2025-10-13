@@ -17,10 +17,10 @@ export class Compra {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'enum', enum: EstadoCompra, default: EstadoCompra.PENDIENTE })
+  @Column({ type: 'enum', enum: EstadoCompra, default: EstadoCompra.INICIADA })
   estado: EstadoCompra;
 
-  @Column({ name: 'comprobante_transferencia' })
+  @Column({ name: 'comprobante_transferencia', nullable: true })
   comprobanteTransferencia: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
