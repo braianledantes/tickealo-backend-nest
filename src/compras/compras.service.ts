@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
@@ -61,7 +62,7 @@ export class ComprasService {
       });
 
       if (!entrada) {
-        throw new BadRequestException('La entrada no existe.');
+        throw new NotFoundException('La entrada no existe.');
       }
 
       // verifico que el evento no haya finalizado
@@ -179,7 +180,7 @@ export class ComprasService {
     });
 
     if (!compra) {
-      throw new BadRequestException('La compra no existe.');
+      throw new NotFoundException('La compra no existe.');
     }
 
     if (compra.estado !== EstadoCompra.INICIADA) {

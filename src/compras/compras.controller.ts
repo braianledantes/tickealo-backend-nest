@@ -36,6 +36,24 @@ import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 export class ComprasController {
   constructor(private readonly comprasService: ComprasService) {}
 
+  @ApiOperation({ summary: 'Iniciar el proceso de compra de entradas' })
+  @ApiBody({ type: ComprarEntradaDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Proceso de compra iniciado exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 403, description: 'Acceso denegado - Solo clientes' })
+  @ApiResponse({ status: 404, description: 'Evento o entrada no encontrada' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'No se pueden comprar entradas porque el evento ya ha finalizado.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'No hay stock de entradas disponibles para la compra.',
+  })
   @Roles(Role.Cliente)
   @Post('iniciar-compra-entrada')
   iniciarComprarEntrada(
@@ -45,6 +63,25 @@ export class ComprasController {
     return this.comprasService.iniciarComprarEntrada(userId, comprarEntradaDto);
   }
 
+  @ApiOperation({
+    summary: 'Finalizar el proceso de compra de entradas',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({
+    status: 200,
+    description: 'Compra finalizada exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 403, description: 'Acceso denegado - Solo clientes' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - No es tu compra',
+  })
+  @ApiResponse({ status: 404, description: 'Compra no encontrada' })
+  @ApiResponse({
+    status: 400,
+    description: 'La compra ya fue finalizada o cancelada.',
+  })
   @Roles(Role.Cliente)
   @Put(':compraId/finalizar-compra-entrada')
   @UseInterceptors(FileInterceptor('comprobanteTransferencia'))
