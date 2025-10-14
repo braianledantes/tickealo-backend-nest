@@ -36,6 +36,16 @@ export class ValidadorService {
     });
   }
 
+  async removeValidador(userId: number): Promise<void> {
+    const validador = await this.validadoresRepository.findOne({
+      where: { userId },
+    });
+    if (!validador) {
+      throw new NotFoundException('Validador not found');
+    }
+    await this.validadoresRepository.remove(validador);
+  }
+
   /**
    * Finds a validador by the associated user email.
    * @param email - The email of the user associated with the validador.

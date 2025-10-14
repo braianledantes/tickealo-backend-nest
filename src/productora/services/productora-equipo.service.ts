@@ -118,6 +118,27 @@ export class ProductoraEquipoService {
       (v) => v.userId !== validador.userId,
     );
     await this.productoraRepository.save(productora);
+
+    // Si el validador no pertenece a ninguna otra productora, removerle el rol de validador
+    const otrasProductoras = await this.productoraRepository
+      .createQueryBuilder('productora')
+      .leftJoinAndSelect('productora.validadores', 'validador')
+      .where('validador.userId = :validadorId', {
+        validadorId: validador.userId,
+      })
+      .andWhere('productora.userId != :currentProductoraId', {
+        currentProductoraId: idProductora,
+      })
+      .getMany();
+
+    if (otrasProductoras.length === 0) {
+      await this.usersService.removerRolUsuario(
+        validador.userId,
+        Role.Validador,
+      );
+      await this.validadorService.removeValidador(validador.userId);
+    }
+
     return this.productoraRepository.findOne({
       where: { userId: idProductora },
       relations: ['user'],

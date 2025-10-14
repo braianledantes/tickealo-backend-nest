@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
+import { Role as RoleEnum } from 'src/auth/enums/role.enum';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -110,6 +111,36 @@ export class UsersService {
     }
 
     user.roles.push(role);
+    return this.usersRepository.save(user);
+  }
+
+  async removerRolUsuario(userId: number, roleName: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Prevent removing the 'cliente' role
+    if (roleName === RoleEnum.Cliente.toString()) {
+      throw new BadRequestException("Cannot remove the 'cliente' role");
+    }
+
+    const role = await this.rolesRepository.findOne({
+      where: { name: roleName },
+    });
+    if (!role) {
+      throw new UnprocessableEntityException('Role not found');
+    }
+
+    // Check if the user has the role
+    if (!user.roles.some((r) => r.name === roleName)) {
+      return user; // Role not assigned, return the user as is
+    }
+
+    user.roles = user.roles.filter((r) => r.name !== roleName);
     return this.usersRepository.save(user);
   }
 
