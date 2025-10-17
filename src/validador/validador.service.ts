@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
+import { Evento } from 'src/eventos/entities/evento.entity';
+import { Productora } from 'src/productora/entities/productora.entity';
 import { Repository } from 'typeorm';
 import { Validador } from './entities/validador.entity';
-import { Productora } from 'src/productora/entities/productora.entity';
-import { Evento } from 'src/eventos/entities/evento.entity';
 
 @Injectable()
 export class ValidadorService {
@@ -12,6 +12,8 @@ export class ValidadorService {
     @InjectRepository(Validador)
     private readonly validadoresRepository: Repository<Validador>,
     private readonly clientesService: ClientesService,
+    @InjectRepository(Evento)
+    private readonly eventosRepository: Repository<Evento>,
   ) {}
 
   /**
@@ -85,6 +87,45 @@ export class ValidadorService {
     );
 
     return eventos;
+  }
+
+  /**
+   * Retrieves all tickets verified by the validador for a specific event.
+   * @param userId - The userId of the validador.
+   * @param eventoId - The ID of the event.
+   * @returns An array of tickets verified by the validador for the specified event.
+   * @throws NotFoundException if no validador or event is found with the given IDs.
+   */
+  async getTicketsByEvento(userId: number, eventoId: number) {
+    const validador = await this.validadoresRepository.findOne({
+      where: { userId },
+      relations: [
+        'productoras',
+        'productoras.eventos',
+        'productoras.eventos.entradas',
+        'productoras.eventos.entradas.tickets',
+        'productoras.eventos.entradas.tickets.validatedBy',
+      ],
+    });
+
+    if (!validador) {
+      throw new NotFoundException('Validador no encontrado');
+    }
+
+    const evento = validador.productoras
+      .flatMap((productora) => productora.eventos)
+      .find((evento) => evento.id === eventoId);
+
+    if (!evento) {
+      throw new NotFoundException(
+        'Evento no encontrado para las productoras del validador',
+      );
+    }
+
+    const tickets = evento.entradas
+      .flatMap((entrada) => entrada.tickets)
+      .filter((ticket) => ticket.validatedBy?.userId === userId);
+    return { tickets };
   }
 
   /**

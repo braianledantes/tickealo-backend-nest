@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
@@ -29,6 +29,15 @@ export class ValidadorController {
   @Get('eventos')
   getEventosDelValidador(@GetUser('id') userId: number) {
     return this.validadorService.getEventosDelValidador(userId);
+  }
+
+  @Roles(Role.Validador)
+  @Get('eventos/:eventoId/tickets')
+  getTicketsByEvento(
+    @GetUser('id') userId: number,
+    @Param('eventoId', ParseIntPipe) eventoId: number,
+  ) {
+    return this.validadorService.getTicketsByEvento(userId, eventoId);
   }
 
   @ApiOperation({
