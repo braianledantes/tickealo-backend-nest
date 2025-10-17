@@ -25,7 +25,7 @@ export class Evento {
   @Column()
   nombre: string;
 
-  @Column()
+  @Column({ type: 'text' })
   descripcion: string;
 
   @Column({ name: 'inicio_at', type: 'timestamp' })
