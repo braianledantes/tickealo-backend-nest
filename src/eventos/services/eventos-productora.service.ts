@@ -230,7 +230,7 @@ export class EventosProductoraService {
    * @returns El evento con sus entradas y tickets asociados.
    */
   async findTicketsByEvento(idEvento: number) {
-    const eventos = await this.eventoRepository.findOne({
+    const evento = await this.eventoRepository.findOne({
       where: { id: idEvento },
       relations: [
         'entradas',
@@ -240,8 +240,12 @@ export class EventosProductoraService {
       ],
     });
 
+    if (!evento) {
+      throw new NotFoundException('Evento no encontrado');
+    }
+
     const tickets =
-      eventos?.entradas.flatMap((entrada) => entrada.tickets) || [];
+      evento?.entradas.flatMap((entrada) => entrada.tickets) || [];
     return { tickets };
   }
 }

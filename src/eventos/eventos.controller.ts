@@ -36,6 +36,8 @@ import { EventosProductoraService } from './services/eventos-productora.service'
 
 @ApiTags('Eventos')
 @ApiBearerAuth()
+@ApiResponse({ status: 401, description: 'No autorizado' })
+@ApiResponse({ status: 403, description: 'Acceso denegado' })
 @Controller('eventos')
 export class EventosController {
   constructor(
@@ -50,11 +52,6 @@ export class EventosController {
   @ApiBody({ type: CreateEventoDto })
   @ApiResponse({ status: 201, description: 'Evento creado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos del evento inválidos' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({
-    status: 403,
-    description: 'Acceso denegado - Solo productoras',
-  })
   @Roles(Role.Productora)
   @Post()
   create(
@@ -113,10 +110,6 @@ export class EventosController {
     description: 'Imágenes actualizadas exitosamente',
   })
   @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({
-    status: 403,
-    description: 'Acceso denegado - Solo productoras',
-  })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Roles(Role.Productora)
   @Patch(':id/imagenes')
@@ -165,6 +158,14 @@ export class EventosController {
     return this.eventosClienteService.findOne(userId, id);
   }
 
+  @ApiOperation({
+    summary: 'Obtener tickets asociados a un evento',
+    description:
+      '🏢 **Acceso:** Solo Productoras autenticadas (propietarias del evento)',
+  })
+  @ApiParam({ name: 'id', description: 'ID del evento' })
+  @ApiResponse({ status: 200, description: 'Tickets obtenidos exitosamente' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Roles(Role.Productora)
   @Get(':id/tickets')
   findTicketsByEvento(@Param('id', ParseIntPipe) id: number) {
@@ -180,11 +181,6 @@ export class EventosController {
   @ApiBody({ type: UpdateEventoDto })
   @ApiResponse({ status: 200, description: 'Evento actualizado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos del evento inválidos' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({
-    status: 403,
-    description: 'Acceso denegado - Solo productoras',
-  })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Roles(Role.Productora)
   @Patch(':id')
@@ -203,11 +199,6 @@ export class EventosController {
   })
   @ApiParam({ name: 'id', description: 'ID del evento' })
   @ApiResponse({ status: 204, description: 'Evento eliminado exitosamente' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({
-    status: 403,
-    description: 'Acceso denegado - Solo productoras y administradores',
-  })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Roles(Role.Productora, Role.Admin)
   @HttpCode(HttpStatus.NO_CONTENT)
