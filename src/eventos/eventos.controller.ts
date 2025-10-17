@@ -75,6 +75,15 @@ export class EventosController {
     return this.eventosClienteService.findUpcoming();
   }
 
+  @ApiOperation({
+    summary: 'Obtener eventos seguidos por el cliente',
+    description: '👤 **Acceso:** Solo Clientes autenticados',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de eventos seguidos obtenida exitosamente',
+    isArray: true,
+  })
   @Roles(Role.Cliente)
   @Get('seguidos')
   findFollowedEventos(@GetUser('id') userId: number) {
