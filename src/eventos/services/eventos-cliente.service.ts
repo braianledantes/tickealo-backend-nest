@@ -171,4 +171,14 @@ export class EventosClienteService {
       order: { inicioAt: 'ASC' },
     });
   }
+
+  async findFollowedEventos(userId: number) {
+    const eventos = await this.eventoRepository.find({
+      where: { productora: { seguidores: { userId } } },
+      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
+      order: { inicioAt: 'ASC' },
+    });
+
+    return eventos;
+  }
 }

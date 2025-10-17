@@ -78,6 +78,12 @@ export class EventosController {
     return this.eventosClienteService.findUpcoming();
   }
 
+  @Roles(Role.Cliente)
+  @Get('seguidos')
+  findFollowedEventos(@GetUser('id') userId: number) {
+    return this.eventosClienteService.findFollowedEventos(userId);
+  }
+
   @ApiOperation({
     summary: 'Actualizar imágenes de un evento',
     description:
