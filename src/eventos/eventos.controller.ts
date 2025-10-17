@@ -159,6 +159,12 @@ export class EventosController {
     return this.eventosClienteService.findOne(userId, id);
   }
 
+  @Roles(Role.Productora)
+  @Get(':id/tickets')
+  findTicketsByEvento(@Param('id', ParseIntPipe) id: number) {
+    return this.eventosProductoraService.findTicketsByEvento(id);
+  }
+
   @ApiOperation({
     summary: 'Actualizar un evento',
     description:

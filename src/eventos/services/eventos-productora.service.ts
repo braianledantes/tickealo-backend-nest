@@ -223,4 +223,25 @@ export class EventosProductoraService {
     }
     await this.eventoRepository.remove(evento);
   }
+
+  /**
+   * Devuelve los tickets asociados a un evento específico.
+   * @param idEvento ID del evento.
+   * @returns El evento con sus entradas y tickets asociados.
+   */
+  async findTicketsByEvento(idEvento: number) {
+    const eventos = await this.eventoRepository.findOne({
+      where: { id: idEvento },
+      relations: [
+        'entradas',
+        'entradas.tickets',
+        'entradas.tickets.validatedBy',
+        'entradas.tickets.entrada',
+      ],
+    });
+
+    const tickets =
+      eventos?.entradas.flatMap((entrada) => entrada.tickets) || [];
+    return { tickets };
+  }
 }
