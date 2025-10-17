@@ -42,6 +42,9 @@ export class Ticket {
   @ManyToOne(() => Cliente, (cliente) => cliente.tickets)
   cliente: Cliente;
 
+  @Column({ name: 'entrada_id' })
+  entradaId: number;
+
   @JoinColumn({ name: 'entrada_id' })
   @ManyToOne(() => Entrada, (entrada) => entrada.tickets)
   entrada: Entrada;
