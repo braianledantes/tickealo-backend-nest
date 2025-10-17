@@ -10,6 +10,7 @@ import {
 import { Cliente } from '../../clientes/entities/cliente.entity';
 import { Compra } from '../../compras/entities/compra.entity';
 import { Entrada } from '../../eventos/entities/entrada.entity';
+import { Validador } from '../../validador/entities/validador.entity';
 import { EstadoTicket } from '../enums/estado-ticket.enum';
 
 @Entity()
@@ -48,6 +49,12 @@ export class Ticket {
   @JoinColumn({ name: 'compra_id' })
   @ManyToOne(() => Compra, (compra) => compra.tickets)
   compra: Compra;
+
+  @JoinColumn({ name: 'validated_by' })
+  @ManyToOne(() => Validador, (validator) => validator.tickets, {
+    nullable: true,
+  })
+  validatedBy?: Validador;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

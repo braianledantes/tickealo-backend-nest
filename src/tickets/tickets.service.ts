@@ -74,8 +74,8 @@ export class TicketsService {
     }
 
     const equipo = ticket.entrada.evento.productora.validadores;
-    const esValidador = equipo.some((validador) => validador.userId === userId);
-    if (!esValidador) {
+    const validador = equipo.find((validador) => validador.userId === userId);
+    if (!validador) {
       throw new UnauthorizedException(
         'No tienes permiso para validar este ticket',
       );
@@ -91,6 +91,7 @@ export class TicketsService {
       );
     }
     ticket.estado = EstadoTicket.VALIDADO;
+    ticket.validatedBy = validador;
     await this.ticketsRepository.save(ticket);
   }
 }
