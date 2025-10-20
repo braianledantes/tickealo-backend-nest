@@ -8,10 +8,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Lugar } from '../../lugares/entities/lugar.entity';
-import { Entrada } from './entrada.entity';
-import { Productora } from '../../productora/entities/productora.entity';
+import { Comentario } from '../../comentarios/entities/comentario.entity';
 import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
+import { Lugar } from '../../lugares/entities/lugar.entity';
+import { Productora } from '../../productora/entities/productora.entity';
+import { Entrada } from './entrada.entity';
 
 @Entity()
 export class Evento {
@@ -67,4 +68,9 @@ export class Evento {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => Comentario, (comentario) => comentario.evento, {
+    cascade: true,
+  })
+  comentarios: Comentario[];
 }

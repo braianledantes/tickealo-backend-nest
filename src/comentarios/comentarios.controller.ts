@@ -1,0 +1,77 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { ComentariosService } from './comentarios.service';
+import { CreateComentarioDto } from './dto/create-comentario.dto';
+import { UpdateComentarioDto } from './dto/update-comentario.dto';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+
+@ApiBearerAuth()
+@ApiResponse({ status: 401, description: 'No autorizado' })
+@ApiResponse({ status: 403, description: 'Acceso denegado' })
+@Controller('comentarios')
+export class ComentariosController {
+  constructor(private readonly comentariosService: ComentariosService) {}
+
+  @ApiResponse({ status: 201, description: 'Comentario creado exitosamente' })
+  @ApiResponse({ status: 400, description: 'Datos del comentario inválidos' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  @Post('evento/:eventoId')
+  create(
+    @GetUser('id') userId: number,
+    @Param('eventoId', ParseIntPipe) eventoId: number,
+    @Body() createComentarioDto: CreateComentarioDto,
+  ) {
+    return this.comentariosService.create(
+      userId,
+      eventoId,
+      createComentarioDto,
+    );
+  }
+
+  @ApiResponse({ status: 200, description: 'Lista de comentarios del evento' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  @Get('evento/:eventoId')
+  findAll(@Param('eventoId', ParseIntPipe) eventoId: number) {
+    return this.comentariosService.findAll(eventoId);
+  }
+
+  @ApiResponse({ status: 200, description: 'Comentario encontrado' })
+  @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.comentariosService.findOne(id);
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Comentario actualizado exitosamente',
+  })
+  @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
+  @Patch(':id')
+  update(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateComentarioDto: UpdateComentarioDto,
+  ) {
+    return this.comentariosService.update(userId, id, updateComentarioDto);
+  }
+
+  @ApiResponse({
+    status: 200,
+    description: 'Comentario eliminado exitosamente',
+  })
+  @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.comentariosService.remove(id);
+  }
+}

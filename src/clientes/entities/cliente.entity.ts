@@ -8,6 +8,7 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+import { Comentario } from '../../comentarios/entities/comentario.entity';
 import { Compra } from '../../compras/entities/compra.entity';
 import { Productora } from '../../productora/entities/productora.entity';
 import { Ticket } from '../../tickets/entities/ticket.entity';
@@ -53,4 +54,9 @@ export class Cliente {
 
   @OneToMany(() => Ticket, (ticket) => ticket.cliente)
   tickets: Ticket[];
+
+  @OneToMany(() => Comentario, (comentario) => comentario.cliente, {
+    cascade: true,
+  })
+  comentarios: Comentario[];
 }

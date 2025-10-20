@@ -15,6 +15,7 @@ import { ClientesModule } from './clientes/clientes.module';
 import { ComprasModule } from './compras/compras.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ComentariosModule } from './comentarios/comentarios.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ClientesModule,
     ComprasModule,
     TicketsModule,
+    ComentariosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
