@@ -1,4 +1,4 @@
-import { Controller, Param, ParseIntPipe, Patch } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -38,5 +38,19 @@ export class TicketsController {
     @Param('codigoAlfanumerico') codigoAlfanumerico: string,
   ) {
     return this.ticketsService.validarTicket(userId, codigoAlfanumerico);
+  }
+
+  @ApiOperation({
+    summary: 'Obtener tickets asociados a un evento',
+    description:
+      '🏢 **Acceso:** Solo Productoras autenticadas (propietarias del evento)',
+  })
+  @ApiParam({ name: 'id', description: 'ID del evento' })
+  @ApiResponse({ status: 200, description: 'Tickets obtenidos exitosamente' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  @Roles(Role.Productora, Role.Validador)
+  @Get('eventos/:idEvento')
+  findTicketsByEvento(@Param('idEvento', ParseIntPipe) idEvento: number) {
+    return this.ticketsService.findTicketsByEvento(idEvento);
   }
 }

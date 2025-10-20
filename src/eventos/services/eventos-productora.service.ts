@@ -225,6 +225,7 @@ export class EventosProductoraService {
   }
 
   /**
+   * TODO: Eliminar endpoint y mover a TicketsService
    * Devuelve los tickets asociados a un evento específico.
    * @param idEvento ID del evento.
    * @returns El evento con sus entradas y tickets asociados.

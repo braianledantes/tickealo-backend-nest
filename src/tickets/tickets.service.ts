@@ -94,4 +94,19 @@ export class TicketsService {
     ticket.validatedBy = validador;
     await this.ticketsRepository.save(ticket);
   }
+
+  /**
+   * Devuelve los tickets asociados a un evento específico.
+   * @param idEvento ID del evento.
+   * @returns Lista de tickets asociados al evento.
+   */
+  async findTicketsByEvento(idEvento: number) {
+    const tickets = await this.ticketsRepository.find({
+      where: { entrada: { evento: { id: idEvento } } },
+      relations: ['entrada', 'validatedBy'],
+      order: { id: 'DESC' },
+    });
+
+    return { tickets };
+  }
 }
