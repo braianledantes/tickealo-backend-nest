@@ -8,7 +8,7 @@ import {
   ParseIntPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
@@ -21,6 +21,7 @@ import { FavoritosService } from './favoritos.service';
 export class FavoritosController {
   constructor(private readonly favoritosService: FavoritosService) {}
 
+  @ApiOperation({ summary: 'Añadir evento a favoritos del cliente actual' })
   @ApiResponse({
     status: 200,
     description: 'Evento añadido a favoritos correctamente',
@@ -36,6 +37,7 @@ export class FavoritosController {
     return this.favoritosService.addEventoToFavorites(userId, eventoId);
   }
 
+  @ApiOperation({ summary: 'Eliminar evento de favoritos del cliente actual' })
   @ApiResponse({
     status: 200,
     description: 'Evento eliminado de favoritos correctamente',
@@ -51,6 +53,9 @@ export class FavoritosController {
     return this.favoritosService.removeEventoFromFavorites(userId, eventoId);
   }
 
+  @ApiOperation({
+    summary: 'Obtener lista de eventos favoritos del cliente actual',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de eventos favoritos obtenida correctamente',
