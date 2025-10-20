@@ -8,7 +8,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
@@ -23,6 +23,7 @@ import { UpdateComentarioDto } from './dto/update-comentario.dto';
 export class ComentariosController {
   constructor(private readonly comentariosService: ComentariosService) {}
 
+  @ApiOperation({ summary: 'Crear un nuevo comentario para un evento' })
   @ApiResponse({ status: 201, description: 'Comentario creado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos del comentario inválidos' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
@@ -40,6 +41,7 @@ export class ComentariosController {
     );
   }
 
+  @ApiOperation({ summary: 'Obtener todos los comentarios de un evento' })
   @ApiResponse({ status: 200, description: 'Lista de comentarios del evento' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   @Get('evento/:eventoId')
@@ -47,6 +49,7 @@ export class ComentariosController {
     return this.comentariosService.findAll(eventoId);
   }
 
+  @ApiOperation({ summary: 'Obtener un comentario por su ID' })
   @ApiResponse({ status: 200, description: 'Comentario encontrado' })
   @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
   @Get(':id')
@@ -54,6 +57,10 @@ export class ComentariosController {
     return this.comentariosService.findOne(id);
   }
 
+  @ApiOperation({
+    summary:
+      'Actualizar un comentario existente (solo el cliente puede actualizarlo)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Comentario actualizado exitosamente',
@@ -69,6 +76,10 @@ export class ComentariosController {
     return this.comentariosService.update(userId, id, updateComentarioDto);
   }
 
+  @ApiOperation({
+    summary:
+      'Eliminar un comentario por su ID (solo el cliente o la productora propietaria del evento pueden eliminarlo)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Comentario eliminado exitosamente',
@@ -80,6 +91,12 @@ export class ComentariosController {
     return this.comentariosService.remove(userId, id);
   }
 
+  @ApiOperation({
+    summary:
+      'Fijar un comentario en un evento (solo la productora puede hacerlo)',
+  })
+  @ApiResponse({ status: 200, description: 'Comentario fijado exitosamente' })
+  @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
   @Roles(Role.Productora)
   @Patch(':id/fijar')
   fijarComentario(
@@ -89,6 +106,15 @@ export class ComentariosController {
     return this.comentariosService.fijarComentario(userId, id);
   }
 
+  @ApiOperation({
+    summary:
+      'Desfijar un comentario en un evento (solo la productora puede hacerlo)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Comentario desfijado exitosamente',
+  })
+  @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
   @Roles(Role.Productora)
   @Patch(':id/desfijar')
   desfijarComentario(
