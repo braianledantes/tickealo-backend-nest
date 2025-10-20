@@ -1,18 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/enums/role.enum';
 import { ComentariosService } from './comentarios.service';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
-import { GetUser } from 'src/auth/decorators/get-user.decorator';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @ApiResponse({ status: 401, description: 'No autorizado' })
@@ -24,6 +26,7 @@ export class ComentariosController {
   @ApiResponse({ status: 201, description: 'Comentario creado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos del comentario inválidos' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  @Roles(Role.Cliente)
   @Post('evento/:eventoId')
   create(
     @GetUser('id') userId: number,
@@ -56,6 +59,7 @@ export class ComentariosController {
     description: 'Comentario actualizado exitosamente',
   })
   @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
+  @Roles(Role.Cliente)
   @Patch(':id')
   update(
     @GetUser('id') userId: number,
@@ -70,8 +74,27 @@ export class ComentariosController {
     description: 'Comentario eliminado exitosamente',
   })
   @ApiResponse({ status: 404, description: 'Comentario no encontrado' })
+  @Roles(Role.Cliente, Role.Productora)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.comentariosService.remove(id);
+  remove(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id: number) {
+    return this.comentariosService.remove(userId, id);
+  }
+
+  @Roles(Role.Productora)
+  @Patch(':id/fijar')
+  fijarComentario(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.comentariosService.fijarComentario(userId, id);
+  }
+
+  @Roles(Role.Productora)
+  @Patch(':id/desfijar')
+  desfijarComentario(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.comentariosService.desfijarComentario(userId, id);
   }
 }

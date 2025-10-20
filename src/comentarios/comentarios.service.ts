@@ -142,13 +142,81 @@ export class ComentariosService {
    * @returns El comentario eliminado.
    * @throws NotFoundException si el comentario no existe.
    */
-  async remove(id: number): Promise<Comentario> {
-    const comentario = await this.comentariosRepository.findOneBy({ id });
+  async remove(userId: number, id: number): Promise<Comentario> {
+    const comentario = await this.comentariosRepository.findOne({
+      where: { id },
+      relations: ['cliente', 'evento', 'evento.productora'],
+    });
 
     if (!comentario) {
       throw new NotFoundException('Comentario no encontrado');
     }
 
+    if (
+      comentario.evento.productora.userId !== userId ||
+      comentario.cliente.userId !== userId
+    ) {
+      throw new UnauthorizedException(
+        'No se puede eliminar un comentario que no es suyo o de un evento que no es suyo',
+      );
+    }
+
     return this.comentariosRepository.remove(comentario);
+  }
+
+  /**
+   * Fija un comentario para destacarlo en el evento asociado.
+   * @param userId - ID del usuario que intenta fijar el comentario.
+   * @param id - ID del comentario a fijar.
+   * @returns El comentario fijado.
+   * @throws NotFoundException si el comentario no existe.
+   * @throws UnauthorizedException si el usuario no es el propietario del evento asociado al comentario.
+   */
+  async fijarComentario(userId: number, id: number) {
+    const comentario = await this.comentariosRepository.findOne({
+      where: { id },
+      relations: ['evento', 'evento.productora'],
+    });
+
+    if (!comentario) {
+      throw new NotFoundException('Comentario no encontrado');
+    }
+
+    if (comentario.evento.productora.userId !== userId) {
+      throw new UnauthorizedException(
+        'No se puede fijar un comentario de un evento que no es suyo',
+      );
+    }
+
+    comentario.fijado = true;
+    return this.comentariosRepository.save(comentario);
+  }
+
+  /**
+   * Desfija un comentario para quitar su destaque en el evento asociado.
+   * @param userId - ID del usuario que intenta desfijar el comentario.
+   * @param id - ID del comentario a desfijar.
+   * @returns El comentario desfijado.
+   * @throws NotFoundException si el comentario no existe.
+   * @throws UnauthorizedException si el usuario no es el propietario del evento asociado al comentario.
+   */
+  async desfijarComentario(userId: number, id: number) {
+    const comentario = await this.comentariosRepository.findOne({
+      where: { id },
+      relations: ['evento', 'evento.productora'],
+    });
+
+    if (!comentario) {
+      throw new NotFoundException('Comentario no encontrado');
+    }
+
+    if (comentario.evento.productora.userId !== userId) {
+      throw new UnauthorizedException(
+        'No se puede desfijar un comentario de un evento que no es suyo',
+      );
+    }
+
+    comentario.fijado = false;
+    return this.comentariosRepository.save(comentario);
   }
 }
