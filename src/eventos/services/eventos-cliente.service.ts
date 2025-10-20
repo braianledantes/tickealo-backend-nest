@@ -175,7 +175,7 @@ export class EventosClienteService {
   async findFollowedEventos(userId: number) {
     const eventos = await this.eventoRepository.find({
       where: { productora: { seguidores: { userId } } },
-      relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
+      relations: ['lugar', 'productora'],
       order: { inicioAt: 'ASC' },
     });
 
