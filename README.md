@@ -7,6 +7,10 @@
 ## Project setup
 
 ```bash
+# copy and rename .env.example to .env and set your environment variables
+$ cp .env.example .env
+
+# install dependencies
 $ npm install
 ```
 
@@ -52,6 +56,15 @@ $ npm run migration:run
 
 # Revert last migration
 $ npm run migration:revert
+
+# Drop database
+$ npm run db:drop
+
+# Seed database
+$ npm run db:seed
+
+# Reset database (drop, migrate, and seed)
+$ npm run db:reset
 ```
 
 ## Deployment
@@ -62,12 +75,15 @@ Run the following commands:
 # 1. Pull the latest changes from the repository
 $ git pull origin main
 
-# 2. Install dependencies
+# 2. Copy and rename .env.example to .env and set your environment variables
+$ cp .env.example .env
+
+# 3. Install dependencies
 $ npm install
 
-# 3. Run database migrations
+# 4. Run database migrations
 $ npm run migration:run
 
-# 4. Start the application
+# 5. Start the application
 $ npm run start
 ```
