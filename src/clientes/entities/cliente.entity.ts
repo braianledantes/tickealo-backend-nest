@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Comentario } from '../../comentarios/entities/comentario.entity';
 import { Compra } from '../../compras/entities/compra.entity';
+import { Evento } from '../../eventos/entities/evento.entity';
 import { Productora } from '../../productora/entities/productora.entity';
 import { Ticket } from '../../tickets/entities/ticket.entity';
 import { User } from '../../users/entities/user.entity';
@@ -59,4 +60,12 @@ export class Cliente {
     cascade: true,
   })
   comentarios: Comentario[];
+
+  @ManyToMany(() => Evento, (evento) => evento.clientesFavoritos)
+  @JoinTable({
+    name: 'clientes_eventos_favoritos',
+    joinColumn: { name: 'cliente_id', referencedColumnName: 'userId' },
+    inverseJoinColumn: { name: 'evento_id', referencedColumnName: 'id' },
+  })
+  eventosFavoritos: Evento[];
 }

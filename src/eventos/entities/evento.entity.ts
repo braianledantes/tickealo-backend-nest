@@ -3,11 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Cliente } from '../../clientes/entities/cliente.entity';
 import { Comentario } from '../../comentarios/entities/comentario.entity';
 import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
 import { Lugar } from '../../lugares/entities/lugar.entity';
@@ -73,4 +75,7 @@ export class Evento {
     cascade: true,
   })
   comentarios: Comentario[];
+
+  @ManyToMany(() => Cliente, (cliente) => cliente.eventosFavoritos)
+  clientesFavoritos: Cliente[];
 }

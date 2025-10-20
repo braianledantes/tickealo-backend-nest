@@ -16,6 +16,7 @@ import { ComprasModule } from './compras/compras.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ComentariosModule } from './comentarios/comentarios.module';
+import { FavoritosModule } from './favoritos/favoritos.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ComentariosModule } from './comentarios/comentarios.module';
     ComprasModule,
     TicketsModule,
     ComentariosModule,
+    FavoritosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
