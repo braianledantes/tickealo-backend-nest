@@ -217,4 +217,81 @@ Ver más detalles: ${eventoUrl}
       textContent,
     );
   }
+
+  /**
+   * Sends a ticket transfer notification email to the recipient.
+   * @param to - Recipient email address.
+   * @param receptorNombre - Name of the ticket recipient.
+   * @param emisorNombre - Name of the ticket sender.
+   * @param eventoNombre - Name of the event.
+   * @param entradaNombre - Name of the ticket type.
+   * @param eventoInicioAt - Start date and time of the event.
+   * @param transferenciaId - ID of the transfer.
+   */
+  async sendTicketTransferNotification(
+    to: string,
+    receptorNombre: string,
+    emisorNombre: string,
+    eventoNombre: string,
+    entradaNombre: string,
+    eventoInicioAt: Date,
+    transferenciaId: number,
+  ): Promise<void> {
+    const apiUrl = this.configService.get<string>(
+      'API_URL',
+      'http://localhost:3000',
+    );
+    const aceptarUrl = `${apiUrl}/transferencias/${transferenciaId}/aceptar`;
+
+    // Format date and time
+    const eventoFecha = eventoInicioAt.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const eventoHora = eventoInicioAt.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // Read and process the template
+    const templatePath = path.join(
+      __dirname,
+      'templates',
+      'ticket-transfer.html',
+    );
+    let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+
+    // Replace template variables
+    htmlTemplate = htmlTemplate
+      .replace(/{{receptorNombre}}/g, receptorNombre)
+      .replace(/{{emisorNombre}}/g, emisorNombre)
+      .replace(/{{eventoNombre}}/g, eventoNombre)
+      .replace(/{{entradaNombre}}/g, entradaNombre)
+      .replace(/{{eventoFecha}}/g, eventoFecha)
+      .replace(/{{eventoHora}}/g, eventoHora)
+      .replace(/{{aceptarUrl}}/g, aceptarUrl);
+
+    // Plain text version
+    const textContent = `¡Hola ${receptorNombre}!
+
+${emisorNombre} te ha transferido un ticket para el evento "${eventoNombre}".
+
+Detalles del evento:
+- Tipo de Entrada: ${entradaNombre}
+- Fecha: ${eventoFecha}
+- Hora: ${eventoHora}
+
+Para aceptar esta transferencia, visita: ${aceptarUrl}
+
+¡Nos vemos allí!`;
+
+    await this.sendMail(
+      to,
+      `🎫 Transferencia de Ticket: ${eventoNombre} - Tickealo`,
+      htmlTemplate,
+      textContent,
+    );
+  }
 }

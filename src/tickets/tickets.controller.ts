@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -14,6 +21,12 @@ import { TicketsService } from './tickets.service';
 @Controller('tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
+
+  @Roles(Role.Cliente)
+  @Get()
+  getMisTickets(@GetUser('id') userId: number) {
+    return this.ticketsService.getTicketsByCliente(userId);
+  }
 
   @ApiOperation({
     summary: 'Validar un ticket mediante su código alfanumérico',
@@ -52,5 +65,34 @@ export class TicketsController {
   @Get('eventos/:idEvento')
   findTicketsByEvento(@Param('idEvento', ParseIntPipe) idEvento: number) {
     return this.ticketsService.findTicketsByEvento(idEvento);
+  }
+
+  @Roles(Role.Cliente)
+  @Post(':ticketId/transferir/:receptorEmail')
+  transferirTicket(
+    @GetUser('id') userId: number,
+    @Param('ticketId', ParseIntPipe) ticketId: number,
+    @Param('receptorEmail') receptorEmail: string,
+  ) {
+    return this.ticketsService.transferirTicket(
+      userId,
+      ticketId,
+      receptorEmail,
+    );
+  }
+
+  @Roles(Role.Cliente)
+  @Get('transferencias/recibidas')
+  getMisTransferencias(@GetUser('id') userId: number) {
+    return this.ticketsService.findTransferenciasRecibidas(userId);
+  }
+
+  @Roles(Role.Cliente)
+  @Post('transferencias/:transferenciaId/aceptar')
+  aceptarTransferencia(
+    @GetUser('id') userId: number,
+    @Param('transferenciaId', ParseIntPipe) transferenciaId: number,
+  ) {
+    return this.ticketsService.aceptarTransferencia(userId, transferenciaId);
   }
 }

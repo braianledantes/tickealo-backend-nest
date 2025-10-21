@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,6 +13,7 @@ import { Compra } from '../../compras/entities/compra.entity';
 import { Entrada } from '../../eventos/entities/entrada.entity';
 import { Validador } from '../../validador/entities/validador.entity';
 import { EstadoTicket } from '../enums/estado-ticket.enum';
+import { TicketTransferencia } from './ticket-transferencia.entity';
 
 @Entity()
 export class Ticket {
@@ -58,6 +60,9 @@ export class Ticket {
     nullable: true,
   })
   validatedBy?: Validador;
+
+  @OneToMany(() => TicketTransferencia, (transferencia) => transferencia.ticket)
+  transferencias: TicketTransferencia[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

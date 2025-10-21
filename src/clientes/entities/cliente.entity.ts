@@ -13,6 +13,7 @@ import { Compra } from '../../compras/entities/compra.entity';
 import { Evento } from '../../eventos/entities/evento.entity';
 import { Productora } from '../../productora/entities/productora.entity';
 import { Recordatorio } from '../../recordatorios/entities/recordatorio.entity';
+import { TicketTransferencia } from '../../tickets/entities/ticket-transferencia.entity';
 import { Ticket } from '../../tickets/entities/ticket.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -72,4 +73,16 @@ export class Cliente {
 
   @OneToMany(() => Recordatorio, (recordatorio) => recordatorio.cliente)
   recordatorios: Recordatorio[];
+
+  @OneToMany(
+    () => TicketTransferencia,
+    (transferencia) => transferencia.clienteEmisor,
+  )
+  transferenciasEnviadas: TicketTransferencia[];
+
+  @OneToMany(
+    () => TicketTransferencia,
+    (transferencia) => transferencia.clienteReceptor,
+  )
+  transferenciasRecibidas: TicketTransferencia[];
 }
