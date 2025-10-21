@@ -9,6 +9,7 @@ import { Evento } from './entities/evento.entity';
 import { EventosController } from './eventos.controller';
 import { EventosClienteService } from './services/eventos-cliente.service';
 import { EventosProductoraService } from './services/eventos-productora.service';
+import { EventosService } from './services/eventos.service';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { EventosProductoraService } from './services/eventos-productora.service'
     FilesModule,
   ],
   controllers: [EventosController],
-  providers: [EventosProductoraService, EventosClienteService],
+  providers: [EventosProductoraService, EventosClienteService, EventosService],
+  exports: [EventosService],
 })
 export class EventosModule {}

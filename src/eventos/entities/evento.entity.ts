@@ -14,6 +14,7 @@ import { Comentario } from '../../comentarios/entities/comentario.entity';
 import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
 import { Lugar } from '../../lugares/entities/lugar.entity';
 import { Productora } from '../../productora/entities/productora.entity';
+import { Recordatorio } from '../../recordatorios/entities/recordatorio.entity';
 import { Entrada } from './entrada.entity';
 
 @Entity()
@@ -78,4 +79,7 @@ export class Evento {
 
   @ManyToMany(() => Cliente, (cliente) => cliente.eventosFavoritos)
   clientesFavoritos: Cliente[];
+
+  @OneToMany(() => Recordatorio, (recordatorio) => recordatorio.evento)
+  recordatorios: Recordatorio[];
 }

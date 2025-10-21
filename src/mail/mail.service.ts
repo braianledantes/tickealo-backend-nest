@@ -4,8 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { MailEntity } from './entities/mail.entity';
 import { Repository } from 'typeorm';
+import { MailEntity } from './entities/mail.entity';
 
 @Injectable()
 export class MailService {
@@ -18,7 +18,7 @@ export class MailService {
     private readonly configService: ConfigService,
   ) {
     this.canSendEmails =
-      this.configService.get<boolean>('CAN_SEND_EMAILS', false) === true;
+      this.configService.get<string>('CAN_SEND_EMAILS', 'false') === 'true';
   }
 
   /**
@@ -28,7 +28,12 @@ export class MailService {
    * @param html - HTML content of the email.
    * @param text - Plain text content of the email (optional).
    */
-  async sendMail(to: string, subject: string, html: string, text?: string) {
+  private async sendMail(
+    to: string,
+    subject: string,
+    html: string,
+    text?: string,
+  ) {
     const mailRecord = this.mailRepository.create({
       to,
       from: this.configService.get<string>('SMTP_FROM'),
@@ -65,15 +70,6 @@ export class MailService {
     }
   }
 
-  async sendVerificationEmail(to: string, code: string) {
-    return await this.sendMail(
-      to,
-      'Email Verification',
-      'Please verify your email using this code: ' + code,
-      'Please verify your email using this code: ' + code,
-    );
-  }
-
   /**
    * Sends an email verification email with JWT token.
    * @param to - Recipient email address.
@@ -106,6 +102,119 @@ export class MailService {
       '🎫 Verificación de Email - Tickealo',
       htmlTemplate,
       `¡Hola ${username}! Para verificar tu cuenta en Tickealo, visita: ${verificationUrl}`,
+    );
+  }
+
+  /**
+   * Sends an event reminder email to a client.
+   * @param to - Recipient email address.
+   * @param clienteNombre - Name of the client.
+   * @param eventoNombre - Name of the event.
+   * @param eventoInicioAt - Start date and time of the event.
+   * @param eventoLugarNombre - Name of the event venue.
+   * @param eventoLugarDireccion - Address of the event venue (optional).
+   * @param eventoBannerUrl - URL of the event banner image (optional).
+   * @param eventoId - ID of the event.
+   * @param daysBefore - Number of days before the event.
+   */
+  async sendEventReminder(
+    to: string,
+    clienteNombre: string,
+    eventoNombre: string,
+    eventoInicioAt: Date,
+    eventoLugarDireccion: string | null,
+    eventoBannerUrl: string | null,
+    eventoId: number,
+    daysBefore: number,
+  ): Promise<void> {
+    const apiUrl = this.configService.get<string>(
+      'API_URL',
+      'http://localhost:3000',
+    );
+    const eventoUrl = `${apiUrl}/eventos/${eventoId}`;
+
+    // Format date and time
+    const eventoFecha = eventoInicioAt.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const eventoHora = eventoInicioAt.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // Create reminder message based on days before
+    let reminderMessage: string;
+    if (daysBefore === 0) {
+      reminderMessage = '¡El evento es HOY!';
+    } else if (daysBefore === 1) {
+      reminderMessage = '¡El evento es MAÑANA!';
+    } else {
+      reminderMessage = `El evento es en ${daysBefore} días`;
+    }
+
+    // Read and process the template
+    const templatePath = path.join(
+      __dirname,
+      'templates',
+      'event-reminder.html',
+    );
+    let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+
+    // Replace template variables
+    htmlTemplate = htmlTemplate
+      .replace(/{{clienteNombre}}/g, clienteNombre)
+      .replace(/{{reminderMessage}}/g, reminderMessage)
+      .replace(/{{eventoNombre}}/g, eventoNombre)
+      .replace(/{{eventoFecha}}/g, eventoFecha)
+      .replace(/{{eventoHora}}/g, eventoHora)
+      .replace(/{{eventoUrl}}/g, eventoUrl);
+
+    // Handle optional fields
+    if (eventoBannerUrl) {
+      htmlTemplate = htmlTemplate
+        .replace(/{{#if eventoBannerUrl}}/g, '')
+        .replace(/{{\/if}}/g, '')
+        .replace(/{{eventoBannerUrl}}/g, eventoBannerUrl);
+    } else {
+      // Remove the banner section if no banner URL
+      htmlTemplate = htmlTemplate.replace(
+        /{{#if eventoBannerUrl}}[\s\S]*?{{\/if}}/g,
+        '',
+      );
+    }
+
+    if (eventoLugarDireccion) {
+      htmlTemplate = htmlTemplate
+        .replace(/{{#if eventoLugarDireccion}}/g, '')
+        .replace(/{{eventoLugarDireccion}}/g, eventoLugarDireccion);
+    } else {
+      // Remove the address section if no address
+      htmlTemplate = htmlTemplate.replace(
+        /{{#if eventoLugarDireccion}}[\s\S]*?{{\/if}}/g,
+        '',
+      );
+    }
+
+    // Plain text version
+    const textContent = `¡Hola ${clienteNombre}! ${reminderMessage}
+
+Evento: ${eventoNombre}
+Fecha: ${eventoFecha}
+Hora: ${eventoHora}
+${eventoLugarDireccion ? `Dirección: ${eventoLugarDireccion}` : ''}
+
+Ver más detalles: ${eventoUrl}
+
+¡Nos vemos allí!`;
+
+    await this.sendMail(
+      to,
+      `🎫 Recordatorio: ${eventoNombre} - Tickealo`,
+      htmlTemplate,
+      textContent,
     );
   }
 }

@@ -128,16 +128,33 @@ export class EventosClienteService {
    * @throws NotFoundException si el evento no existe.
    */
   async findOne(userId: number, id: number) {
-    const evento = await this.eventoRepository.findOne({
-      where: { id },
-      relations: [
-        'lugar',
-        'productora',
-        'cuentaBancaria',
-        'entradas',
+    const evento = await this.eventoRepository
+      .createQueryBuilder('evento')
+      .leftJoinAndSelect('evento.lugar', 'lugar')
+      .leftJoinAndSelect('evento.productora', 'productora')
+      .leftJoinAndSelect('evento.cuentaBancaria', 'cuentaBancaria')
+      .leftJoinAndSelect('evento.entradas', 'entradas')
+      .leftJoinAndSelect(
         'productora.seguidores',
-      ],
-    });
+        'seguidores',
+        'seguidores.userId = :userId',
+        { userId },
+      )
+      .leftJoinAndSelect(
+        'evento.recordatorios',
+        'recordatorios',
+        'recordatorios.cliente_id = :userId',
+        { userId },
+      )
+      .leftJoinAndSelect(
+        'evento.clientesFavoritos',
+        'clientesFavoritos',
+        'clientesFavoritos.userId = :userId',
+        { userId },
+      )
+      .where('evento.id = :id', { id })
+      .getOne();
+
     if (!evento) {
       throw new NotFoundException('Evento not found');
     }
@@ -147,9 +164,11 @@ export class EventosClienteService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { seguidores, ...productoraData } = evento.productora;
-
+    const { recordatorios, clientesFavoritos, ...restEvento } = evento;
     return {
-      ...evento,
+      ...restEvento,
+      tieneRecordatorio: recordatorios.length > 0,
+      esFavorito: clientesFavoritos.length > 0,
       productora: {
         ...productoraData,
         isSeguido,

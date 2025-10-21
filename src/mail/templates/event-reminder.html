@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recordatorio de Evento - Tickealo</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .logo {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 10px;
+      }
+      .event-banner {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .title {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .event-name {
+        color: #3498db;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px 0;
+      }
+      .content {
+        margin-bottom: 30px;
+      }
+      .info-box {
+        background-color: #ecf0f1;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+      .info-row {
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 10px;
+        min-width: 80px;
+      }
+      .info-value {
+        color: #555;
+      }
+      .cta-btn {
+        display: inline-block;
+        background-color: #3498db;
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .cta-btn:hover {
+        background-color: #2980b9;
+      }
+      .reminder-alert {
+        background-color: #f39c12;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+      }
+      .footer {
+        font-size: 12px;
+        color: #7f8c8d;
+        text-align: center;
+        margin-top: 30px;
+        border-top: 1px solid #ecf0f1;
+        padding-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🎫 Tickealo</div>
+      </div>
+
+      <h2 class="title">¡Hola {{clienteNombre}}!</h2>
+
+      <div class="reminder-alert">⏰ {{reminderMessage}}</div>
+
+      <div class="content">
+        {{#if eventoBannerUrl}}
+        <img
+          src="{{eventoBannerUrl}}"
+          alt="{{eventoNombre}}"
+          class="event-banner"
+        />
+        {{/if}}
+
+        <div class="event-name">{{eventoNombre}}</div>
+
+        <div class="info-box">
+          <div class="info-row">
+            <span class="info-label">📅 Fecha:</span>
+            <span class="info-value">{{eventoFecha}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">⏰ Hora:</span>
+            <span class="info-value">{{eventoHora}}</span>
+          </div>
+          {{#if eventoLugarDireccion}}
+          <div class="info-row">
+            <span class="info-label">🗺️ Dirección:</span>
+            <span class="info-value">{{eventoLugarDireccion}}</span>
+          </div>
+          {{/if}}
+        </div>
+
+        <p>
+          No olvides prepararte para este increíble evento. ¡Nos vemos allí!
+        </p>
+
+        <div style="text-align: center">
+          <a href="{{eventoUrl}}" class="cta-btn">Ver Detalles del Evento</a>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Este es un recordatorio automático que configuraste en Tickealo.</p>
+        <p>© 2025 Tickealo. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </body>
+</html>
