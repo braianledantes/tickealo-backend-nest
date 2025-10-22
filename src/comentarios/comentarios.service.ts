@@ -138,6 +138,7 @@ export class ComentariosService {
 
   /**
    * Elimina un comentario por su ID.
+   * @param userId - ID del usuario que intenta eliminar el comentario.
    * @param id - ID del comentario a eliminar.
    * @returns El comentario eliminado.
    * @throws NotFoundException si el comentario no existe.
