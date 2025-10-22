@@ -153,7 +153,7 @@ export class ComentariosService {
     }
 
     if (
-      comentario.evento.productora.userId !== userId ||
+      comentario.evento.productora.userId !== userId &&
       comentario.cliente.userId !== userId
     ) {
       throw new UnauthorizedException(
