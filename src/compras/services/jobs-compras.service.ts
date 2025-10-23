@@ -11,12 +11,12 @@ export class JobsComprasService {
   constructor(private readonly dataSource: DataSource) {}
 
   /**
-   * Elimina las compras que están en estado INICIADA y que fueron creadas hace más de 4 horas.
-   * Este job se ejecuta cada hora.
+   * Elimina las compras que están en estado INICIADA y que fueron creadas hace más de 1 hora.
+   * Este job se ejecuta cada media hora.
    */
-  @Cron('0 * * * *')
+  @Cron('0 */30 * * * *')
   async eliminarComprasNoFinalizadas() {
-    const tiempoLimite = 4 * 60 * 60 * 1000;
+    const tiempoLimite = 60 * 60 * 1000;
     const fechaLimite = new Date(Date.now() - tiempoLimite);
 
     const queryRunner = this.dataSource.createQueryRunner();
