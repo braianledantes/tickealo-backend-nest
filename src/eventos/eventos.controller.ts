@@ -33,6 +33,8 @@ import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
 import { EventosClienteService } from './services/eventos-cliente.service';
 import { EventosProductoraService } from './services/eventos-productora.service';
+import { EventosService } from './services/eventos.service';
+import { CalificacionesEventoDto } from './dto/calificaciones-evento.dto';
 
 @ApiTags('Eventos')
 @ApiBearerAuth()
@@ -43,6 +45,7 @@ export class EventosController {
   constructor(
     private readonly eventosClienteService: EventosClienteService,
     private readonly eventosProductoraService: EventosProductoraService,
+    private readonly eventosService: EventosService,
   ) {}
 
   @ApiOperation({
@@ -214,5 +217,21 @@ export class EventosController {
   @Delete(':id')
   remove(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id: number) {
     return this.eventosProductoraService.remove(userId, id);
+  }
+
+  @ApiOperation({
+    summary: 'Obtener calificaciones de un evento',
+    description: '🌐 **Acceso:** Público - No requiere autorización',
+  })
+  @ApiParam({ name: 'id', description: 'ID del evento' })
+  @ApiResponse({
+    status: 200,
+    description: 'Calificaciones del evento obtenidas exitosamente',
+  })
+  @Get(':id/calificaciones')
+  getCalificaciones(
+    @Param('id', ParseIntPipe) eventoId: number,
+  ): Promise<CalificacionesEventoDto> {
+    return this.eventosService.getCalificaciones(eventoId);
   }
 }
