@@ -46,12 +46,6 @@ export class ComentariosService {
       throw new NotFoundException('Evento no encontrado');
     }
 
-    if (evento.finAt < new Date()) {
-      throw new BadRequestException(
-        'No se pueden agregar comentarios a eventos finalizados',
-      );
-    }
-
     const comentario = this.comentariosRepository.create({
       comentario: createComentarioDto.comentario,
       calificacion: createComentarioDto.calificacion,
