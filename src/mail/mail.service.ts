@@ -6,6 +6,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { Repository } from 'typeorm';
 import { MailEntity } from './entities/mail.entity';
+import { MailSoapService } from './mail-soap.service';
 
 @Injectable()
 export class MailService {
@@ -16,6 +17,7 @@ export class MailService {
     private readonly mailRepository: Repository<MailEntity>,
     private readonly mailService: MailerService,
     private readonly configService: ConfigService,
+    private readonly mailSoapService: MailSoapService,
   ) {
     this.canSendEmails =
       this.configService.get<string>('CAN_SEND_EMAILS', 'false') === 'true';
@@ -52,13 +54,14 @@ export class MailService {
         return;
       }
       // Send the email
-      await this.mailService.sendMail({
-        to,
-        from: this.configService.get<string>('SMTP_FROM'),
-        subject,
-        html,
-        text,
-      });
+      // await this.mailService.sendMail({
+      //   to,
+      //   from: this.configService.get<string>('SMTP_FROM'),
+      //   subject,
+      //   html,
+      //   text,
+      // });
+      await this.mailSoapService.sendEmail(to, subject, html, text || '');
     } catch (error) {
       mail.status = 'failed';
       mail.errorMessage = (error as Error).message;
@@ -111,7 +114,6 @@ export class MailService {
    * @param clienteNombre - Name of the client.
    * @param eventoNombre - Name of the event.
    * @param eventoInicioAt - Start date and time of the event.
-   * @param eventoLugarNombre - Name of the event venue.
    * @param eventoLugarDireccion - Address of the event venue (optional).
    * @param eventoBannerUrl - URL of the event banner image (optional).
    * @param eventoId - ID of the event.

@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailEntity } from './entities/mail.entity';
+import { MailSoapService } from './mail-soap.service';
+import { MailController } from './mail.controller';
 
 @Module({
   imports: [
@@ -28,7 +30,8 @@ import { MailEntity } from './entities/mail.entity';
       }),
     }),
   ],
-  providers: [MailService],
+  controllers: [MailController],
+  providers: [MailService, MailSoapService],
   exports: [MailService],
 })
 export class MailModule {}
