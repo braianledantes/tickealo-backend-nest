@@ -28,6 +28,12 @@ export class Lugar {
   @Column()
   provincia: string;
 
+  @Column({ default: 'Argentina' })
+  pais: string;
+
+  @Column({ name: 'iso_codigo_pais', length: 2, default: 'AR' })
+  isoCodigoPais: string;
+
   @OneToMany(() => Evento, (evento) => evento.lugar)
   eventos: Evento[];
 

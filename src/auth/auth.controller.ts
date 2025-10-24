@@ -138,7 +138,7 @@ export class AuthController {
   @Roles(Role.Productora)
   @Patch('productora-perfil')
   @UseInterceptors(FileInterceptor('imagenPerfil'))
-  updeteProductoraProfile(
+  updateProductoraProfile(
     @GetUser('id') userId: number,
     @Body() updateData: UpdateProductoraDto,
     @UploadedFile(new ImageFileValidationPipe())

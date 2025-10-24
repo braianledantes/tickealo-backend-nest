@@ -26,4 +26,14 @@ export class CreateLugarDto {
   @IsString()
   @Length(2, 100)
   provincia: string;
+
+  @ApiProperty({ example: 'Argentina', description: 'País del lugar' })
+  @IsString()
+  @Length(2, 100)
+  pais: string;
+
+  @ApiProperty({ example: 'AR', description: 'Código ISO del país' })
+  @IsString()
+  @Length(2, 2)
+  isoCodigoPais: string;
 }
