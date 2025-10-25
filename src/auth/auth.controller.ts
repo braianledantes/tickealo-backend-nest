@@ -7,10 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
@@ -37,18 +40,45 @@ import { AuthEmailService } from './services/auth-email.service';
 import { AuthLoginService } from './services/auth-login.service';
 import { AuthProfileService } from './services/auth-profile.service';
 import { AuthRegisterService } from './services/auth-register.service';
-import { AuthService } from './services/auth.service';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { AuthGoogleService } from './services/auth-google.service';
+import { GoogleUser } from './interfaces/google.user.interface';
 
 @ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
     private readonly authEmailService: AuthEmailService,
     private readonly authLoginService: AuthLoginService,
     private readonly authRegisterService: AuthRegisterService,
     private readonly authProfileService: AuthProfileService,
+    private readonly authGoogleService: AuthGoogleService,
   ) {}
+
+  @Public()
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  googleAuth() {
+    console.log('Google auth initiated');
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    const user = await this.authGoogleService.validateOAuthLogin(
+      req.user as GoogleUser,
+    );
+    const deepLink = `tickealo://auth/callback?token=${user.access_token}`;
+    return res.redirect(deepLink);
+  }
+
+  @Public()
+  @Post('google/token')
+  googleToken(@Body() body: { token: string }) {
+    return this.authGoogleService.validateGoogleToken(body.token);
+  }
 
   @ApiOperation({
     summary: 'Iniciar sesión usuario general',

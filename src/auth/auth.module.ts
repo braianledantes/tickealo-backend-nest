@@ -17,6 +17,8 @@ import { AuthRegisterService } from './services/auth-register.service';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { AuthGoogleService } from './services/auth-google.service';
 
 @Module({
   imports: [
@@ -41,8 +43,10 @@ import { LocalStrategy } from './strategies/local.strategy';
     AuthRegisterService,
     AuthEmailService,
     AuthProfileService,
+    AuthGoogleService,
     LocalStrategy,
     JwtStrategy,
+    GoogleStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
