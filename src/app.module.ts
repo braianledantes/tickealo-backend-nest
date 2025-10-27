@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ClientesModule } from './clientes/clientes.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
 import { ComprasModule } from './compras/compras.module';
+import { CountriesModule } from './countries/countries.module';
 import { CuentaBancariaModule } from './cuentabancaria/cuenta-bancaria.module';
 import { DatabaseModule } from './database/database.module';
 import { EventosModule } from './eventos/eventos.module';
@@ -38,6 +39,7 @@ import { ValidadorModule } from './validador/validador.module';
     ComentariosModule,
     FavoritosModule,
     RecordatoriosModule,
+    CountriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
