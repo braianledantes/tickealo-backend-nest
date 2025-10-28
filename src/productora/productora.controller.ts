@@ -19,6 +19,7 @@ import { Role } from 'src/auth/enums/role.enum';
 import { ProductoraEquipoService } from './services/productora-equipo.service';
 import { ProductoraEventosService } from './services/productora-eventos.service';
 import { ProductoraSeguidoresService } from './services/productora-seguidores.service';
+import { ProductoraService } from './services/productora.service';
 
 @ApiTags('Productoras')
 @ApiBearerAuth()
@@ -28,6 +29,7 @@ export class ProductoraController {
     private readonly productoraEventosService: ProductoraEventosService,
     private readonly productoraEquipoService: ProductoraEquipoService,
     private readonly productoraSeguidoresService: ProductoraSeguidoresService,
+    private readonly productoraService: ProductoraService,
   ) {}
 
   @ApiOperation({
@@ -168,6 +170,20 @@ export class ProductoraController {
   @Get('seguidores')
   getSeguidores(@GetUser('id') idProductora: number) {
     return this.productoraSeguidoresService.getSeguidores(idProductora);
+  }
+
+  @ApiOperation({
+    summary: 'Obtener una productora por su ID',
+  })
+  @ApiParam({ name: 'idProductora', description: 'ID de la productora' })
+  @ApiResponse({
+    status: 200,
+    description: 'Productora obtenida exitosamente',
+  })
+  @ApiResponse({ status: 404, description: 'Productora no encontrada' })
+  @Get(':idProductora')
+  getProductora(@Param('idProductora', ParseIntPipe) idProductora: number) {
+    return this.productoraService.findOneById(idProductora);
   }
 
   @ApiOperation({
