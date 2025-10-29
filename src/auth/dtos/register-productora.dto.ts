@@ -34,4 +34,12 @@ export class RegisterProductoraDto extends RegisterUserDto {
   })
   @IsString()
   telefono: string;
+
+  @ApiProperty({
+    description: 'País del cliente',
+    example: 'Argentina',
+    type: String,
+  })
+  @IsString()
+  pais: string;
 }

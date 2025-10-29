@@ -41,6 +41,9 @@ export class Cliente {
   @Column({ name: 'puntos_acumulados', type: 'int', default: 0 })
   puntosAcumulados: number;
 
+  @Column({ nullable: false, default: 'Argentina' })
+  pais: string;
+
   @ManyToMany(() => Productora, (productora) => productora.seguidores)
   @JoinTable({
     name: 'clientes_productoras_seguidas',

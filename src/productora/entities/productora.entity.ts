@@ -47,6 +47,9 @@ export class Productora {
   @Column({ type: 'float', default: 0 })
   calificacion: number;
 
+  @Column({ nullable: false, default: 'Argentina' })
+  pais: string;
+
   @OneToMany(() => Evento, (evento) => evento.productora)
   eventos: Evento[];
 

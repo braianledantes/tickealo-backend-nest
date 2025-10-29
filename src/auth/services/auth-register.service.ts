@@ -21,8 +21,16 @@ export class AuthRegisterService {
     registerProductoraDto: RegisterProductoraDto,
     imageFile?: Express.Multer.File,
   ) {
-    const { username, email, password, cuit, nombre, direccion, telefono } =
-      registerProductoraDto;
+    const {
+      username,
+      email,
+      password,
+      cuit,
+      nombre,
+      direccion,
+      telefono,
+      pais,
+    } = registerProductoraDto;
 
     // Datos del usuario base
     const userData = {
@@ -38,11 +46,13 @@ export class AuthRegisterService {
       direccion: string;
       telefono: string;
       imagenUrl?: string;
+      pais: string;
     } = {
       cuit,
       nombre,
       direccion,
       telefono,
+      pais,
     };
 
     // Si hay una imagen, guardarla y agregar la URL
@@ -91,10 +101,12 @@ export class AuthRegisterService {
       apellido: string;
       telefono: string;
       imagenPerfilUrl?: string;
+      pais: string;
     } = {
       nombre: registerClienteDto.nombre,
       apellido: registerClienteDto.apellido,
       telefono: registerClienteDto.telefono,
+      pais: registerClienteDto.pais,
     };
 
     // Si hay una imagen, guardarla y agregar la URL
