@@ -127,4 +127,28 @@ export class ProductoraService {
       relations: ['validadores', 'cuentaBancaria', 'eventos', 'user'],
     });
   }
+
+  /**
+   * Finds a productora by its ID.
+   * @param id - The ID of the productora to find.
+   * @returns The productora entity.
+   * @throws NotFoundException if the productora is not found.
+   */
+  async findOneById(id: number) {
+    const productora = await this.productoraRepository.findOne({
+      where: { userId: id },
+      relations: ['user', 'seguidores'],
+    });
+
+    if (!productora) {
+      throw new NotFoundException('Productora no encontrada');
+    }
+
+    const { seguidores, ...productoraData } = productora;
+
+    return {
+      ...productoraData,
+      cantSeguidores: seguidores.length,
+    };
+  }
 }
