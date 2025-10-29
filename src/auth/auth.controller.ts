@@ -51,30 +51,6 @@ export class AuthController {
   ) {}
 
   @ApiOperation({
-    summary: 'Iniciar sesión usuario general',
-    description: '🌐 **Acceso:** Público - No requiere autenticación',
-  })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Login exitoso',
-    schema: {
-      example: {
-        access_token: 'jwt_token_here',
-        user: { id: 1, email: 'user@example.com' },
-      },
-    },
-  })
-  @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async login(@GetUser() user: User) {
-    return this.authLoginService.login(user);
-  }
-
-  @ApiOperation({
     summary: 'Iniciar sesión productora',
     description: '🌐 **Acceso:** Público - No requiere autenticación',
   })

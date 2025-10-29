@@ -32,15 +32,6 @@ export class AuthLoginService {
   }
 
   /**
-   * Generates a JWT for the given user.
-   * @param user - The user to generate a JWT for.
-   * @returns An object containing the access token.
-   */
-  async login(user: User) {
-    return this.authService.generateAccessToken(user);
-  }
-
-  /**
    * Generates a JWT for the given productora user after verifying their profile exists.
    * @param user - The productora user to generate a JWT for.
    * @returns An object containing the access token.
