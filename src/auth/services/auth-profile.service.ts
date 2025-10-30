@@ -43,8 +43,16 @@ export class AuthProfileService {
     updateProductoraDto: UpdateProductoraDto,
     imageFile?: Express.Multer.File,
   ) {
-    const { username, email, password, cuit, nombre, direccion, telefono } =
-      updateProductoraDto;
+    const {
+      username,
+      email,
+      password,
+      cuit,
+      nombre,
+      direccion,
+      telefono,
+      pais,
+    } = updateProductoraDto;
 
     const userData: {
       username?: string;
@@ -59,6 +67,7 @@ export class AuthProfileService {
       direccion?: string;
       telefono?: string;
       imagenUrl?: string;
+      pais?: string;
     } = {};
 
     // Solo agregar campos que están definidos en el DTO
@@ -70,6 +79,7 @@ export class AuthProfileService {
     if (nombre !== undefined) productoraData.nombre = nombre;
     if (direccion !== undefined) productoraData.direccion = direccion;
     if (telefono !== undefined) productoraData.telefono = telefono;
+    if (pais !== undefined) productoraData.pais = pais;
 
     // Si hay una imagen, guardarla y agregar la URL
     if (imageFile) {
@@ -92,7 +102,7 @@ export class AuthProfileService {
     updateClienteDto: UpdateClienteDto,
     imageFile?: Express.Multer.File,
   ) {
-    const { username, email, password, nombre, apellido, telefono } =
+    const { username, email, password, nombre, apellido, telefono, pais } =
       updateClienteDto;
 
     const userData: {
@@ -107,6 +117,7 @@ export class AuthProfileService {
       apellido?: string;
       telefono?: string;
       imagenPerfilUrl?: string;
+      pais?: string;
     } = {};
 
     // Solo agregar campos que están definidos en el DTO
@@ -117,6 +128,7 @@ export class AuthProfileService {
     if (nombre !== undefined) clienteData.nombre = nombre;
     if (apellido !== undefined) clienteData.apellido = apellido;
     if (telefono !== undefined) clienteData.telefono = telefono;
+    if (pais !== undefined) clienteData.pais = pais;
 
     // Si hay una imagen, guardarla y agregar la URL
     if (imageFile) {
