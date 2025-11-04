@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
 import { Evento } from 'src/eventos/entities/evento.entity';
+import { ProductoraService } from 'src/productora/services/productora.service';
 import { Repository } from 'typeorm';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
@@ -20,6 +20,7 @@ export class ComentariosService {
     @InjectRepository(Evento)
     private readonly eventosRepository: Repository<Evento>,
     private readonly clientesService: ClientesService,
+    private readonly productoraService: ProductoraService,
   ) {}
 
   /**
@@ -38,8 +39,9 @@ export class ComentariosService {
   ): Promise<Comentario> {
     const cliente = await this.clientesService.findOneById(userId);
 
-    const evento = await this.eventosRepository.findOneBy({
-      id: eventoId,
+    const evento = await this.eventosRepository.findOne({
+      where: { id: eventoId },
+      relations: ['productora'],
     });
 
     if (!evento) {
@@ -53,7 +55,16 @@ export class ComentariosService {
       cliente: cliente,
     });
 
-    return this.comentariosRepository.save(comentario);
+    await this.comentariosRepository.save(comentario);
+
+    await this.productoraService.calculateAverageRating(
+      evento.productora.userId,
+    );
+
+    return this.comentariosRepository.findOneOrFail({
+      where: { id: comentario.id },
+      relations: ['cliente', 'cliente.user'],
+    });
   }
 
   /**
@@ -112,7 +123,7 @@ export class ComentariosService {
   ): Promise<Comentario> {
     const comentario = await this.comentariosRepository.findOne({
       where: { id },
-      relations: ['cliente', 'cliente.user'],
+      relations: ['cliente', 'cliente.user', 'evento', 'evento.productora'],
     });
 
     if (!comentario) {
@@ -127,7 +138,16 @@ export class ComentariosService {
 
     Object.assign(comentario, updateComentarioDto);
 
-    return this.comentariosRepository.save(comentario);
+    await this.comentariosRepository.save(comentario);
+
+    await this.productoraService.calculateAverageRating(
+      comentario.evento.productora.userId,
+    );
+
+    return this.comentariosRepository.findOneOrFail({
+      where: { id },
+      relations: ['cliente', 'cliente.user'],
+    });
   }
 
   /**
@@ -156,7 +176,14 @@ export class ComentariosService {
       );
     }
 
-    return this.comentariosRepository.remove(comentario);
+    const deletedComentario =
+      await this.comentariosRepository.remove(comentario);
+
+    await this.productoraService.calculateAverageRating(
+      comentario.evento.productora.userId,
+    );
+
+    return deletedComentario;
   }
 
   /**

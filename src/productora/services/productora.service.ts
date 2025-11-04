@@ -151,4 +151,36 @@ export class ProductoraService {
       cantSeguidores: seguidores.length,
     };
   }
+
+  /**
+   * Calculates and updates the average rating for the productora based on comments from its events.
+   * @param id - The ID of the productora's user.
+   */
+  async calculateAverageRating(id: number): Promise<void> {
+    // Verify that the productora exists
+    const productora = await this.productoraRepository.findOne({
+      where: { userId: id },
+    });
+
+    if (!productora) {
+      throw new NotFoundException('Productora no encontrada');
+    }
+
+    // Calculate average rating directly in the database using a single query
+    const result = await this.productoraRepository
+      .createQueryBuilder('productora')
+      .leftJoin('productora.eventos', 'evento')
+      .leftJoin('evento.comentarios', 'comentario')
+      .select('AVG(comentario.calificacion)', 'promedio')
+      .where('productora.userId = :id', { id })
+      .getRawOne<{ promedio: string | null }>();
+
+    const averageRating = result?.promedio ? parseFloat(result.promedio) : 0;
+
+    // Update only the calificacion field
+    await this.productoraRepository.update(
+      { userId: id },
+      { calificacion: averageRating },
+    );
+  }
 }

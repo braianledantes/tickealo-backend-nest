@@ -5,9 +5,14 @@ import { ComentariosService } from './comentarios.service';
 import { Comentario } from './entities/comentario.entity';
 import { Evento } from 'src/eventos/entities/evento.entity';
 import { ClientesModule } from 'src/clientes/clientes.module';
+import { ProductoraModule } from 'src/productora/productora.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Comentario, Evento]), ClientesModule],
+  imports: [
+    TypeOrmModule.forFeature([Comentario, Evento]),
+    ClientesModule,
+    ProductoraModule,
+  ],
   controllers: [ComentariosController],
   providers: [ComentariosService],
 })
