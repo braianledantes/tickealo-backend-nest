@@ -1,11 +1,10 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from './mail.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailEntity } from './entities/mail.entity';
-import { MailSoapService } from './mail-soap.service';
 import { MailController } from './mail.controller';
+import { MailService } from './mail.service';
 
 @Module({
   imports: [
@@ -31,7 +30,7 @@ import { MailController } from './mail.controller';
     }),
   ],
   controllers: [MailController],
-  providers: [MailService, MailSoapService],
+  providers: [MailService],
   exports: [MailService],
 })
 export class MailModule {}

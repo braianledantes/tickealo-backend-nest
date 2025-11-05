@@ -6,7 +6,6 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { Repository } from 'typeorm';
 import { MailEntity } from './entities/mail.entity';
-import { MailSoapService } from './mail-soap.service';
 
 @Injectable()
 export class MailService {
@@ -17,7 +16,6 @@ export class MailService {
     private readonly mailRepository: Repository<MailEntity>,
     private readonly mailService: MailerService,
     private readonly configService: ConfigService,
-    private readonly mailSoapService: MailSoapService,
   ) {
     this.canSendEmails =
       this.configService.get<string>('CAN_SEND_EMAILS', 'false') === 'true';
@@ -54,14 +52,13 @@ export class MailService {
         return;
       }
       // Send the email
-      // await this.mailService.sendMail({
-      //   to,
-      //   from: this.configService.get<string>('SMTP_FROM'),
-      //   subject,
-      //   html,
-      //   text,
-      // });
-      await this.mailSoapService.sendEmail(to, subject, html, text || '');
+      await this.mailService.sendMail({
+        to,
+        from: this.configService.get<string>('SMTP_FROM'),
+        subject,
+        html,
+        text,
+      });
     } catch (error) {
       mail.status = 'failed';
       mail.errorMessage = (error as Error).message;
