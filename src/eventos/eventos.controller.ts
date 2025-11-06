@@ -25,16 +25,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { MultipleImageFileValidationPipe } from 'src/files/pipes/multiple-image-file-validation.pipe';
+import { CalificacionesEventoDto } from './dto/calificaciones-evento.dto';
 import { CreateEventoDto } from './dto/create-evento.dto';
 import { FindEventosDto } from './dto/find-eventos.dto';
 import { UpdateEventoDto } from './dto/update-evento.dto';
 import { EventosClienteService } from './services/eventos-cliente.service';
 import { EventosProductoraService } from './services/eventos-productora.service';
 import { EventosService } from './services/eventos.service';
-import { CalificacionesEventoDto } from './dto/calificaciones-evento.dto';
 
 @ApiTags('Eventos')
 @ApiBearerAuth()
@@ -149,7 +150,7 @@ export class EventosController {
     status: 200,
     description: 'Lista paginada de eventos obtenida exitosamente',
   })
-  @Roles(Role.Cliente)
+  @Public()
   @Get()
   findAll(@Query() findEventosDto: FindEventosDto) {
     return this.eventosClienteService.findAllPaginated(findEventosDto);
