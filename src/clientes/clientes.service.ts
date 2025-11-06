@@ -122,4 +122,34 @@ export class ClientesService {
     }
     return cliente;
   }
+
+  /**
+   * Searches for clientes based on a search term.
+   * @param term - The search term to filter clientes by nombre, apellido, or user email.
+   * @returns An object containing the total count and an array of matching clientes.
+   */
+  async searchClientes(
+    term?: string,
+  ): Promise<{ clientes: Cliente[]; total: number }> {
+    if (!term) {
+      const clientes = await this.clientesRepository.find({
+        relations: ['user'],
+        order: { user: { email: 'ASC' } },
+      });
+      return { total: clientes.length, clientes };
+    }
+
+    const termSe = term.trim().toLowerCase();
+
+    const clientes = await this.clientesRepository
+      .createQueryBuilder('cliente')
+      .leftJoinAndSelect('cliente.user', 'user')
+      .where('cliente.nombre LIKE :term', { term: `%${termSe}%` })
+      .orWhere('cliente.apellido LIKE :term', { term: `%${termSe}%` })
+      .orWhere('user.email LIKE :term', { term: `%${termSe}%` })
+      .orderBy('user.email', 'ASC')
+      .getMany();
+
+    return { total: clientes.length, clientes };
+  }
 }
