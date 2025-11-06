@@ -132,7 +132,13 @@ export class TicketsService {
   async getTicketsByCliente(userId: number) {
     const tickets = await this.ticketsRepository.find({
       where: { cliente: { userId: userId } },
-      relations: ['entrada', 'entrada.evento'],
+      relations: [
+        'entrada',
+        'entrada.evento',
+        'validatedBy',
+        'validatedBy.cliente',
+        'validatedBy.cliente.user',
+      ],
       order: { id: 'DESC' },
     });
 
@@ -236,7 +242,16 @@ export class TicketsService {
       where: {
         clienteReceptor: { userId: userId },
       },
-      relations: ['ticket', 'clienteEmisor', 'clienteReceptor'],
+      relations: [
+        'ticket',
+        'clienteEmisor',
+        'clienteReceptor',
+        'ticket.entrada',
+        'ticket.entrada.evento',
+        'ticket.validatedBy',
+        'ticket.validatedBy.cliente',
+        'ticket.validatedBy.cliente.user',
+      ],
       order: { createdAt: 'DESC' },
     });
 
