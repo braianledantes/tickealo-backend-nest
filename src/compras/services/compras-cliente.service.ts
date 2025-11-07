@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
 import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
-import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { Entrada } from 'src/eventos/entities/entrada.entity';
 import { FileUploadService } from 'src/files/file-upload.service';
 import { Ticket } from 'src/tickets/entities/ticket.entity';
@@ -16,9 +15,9 @@ import { TicketsService } from 'src/tickets/tickets.service';
 import { generarSiguienteCodigoAlfanumerico } from 'src/utils/codigos';
 import { DataSource, Not, Repository } from 'typeorm';
 import { ComprarEntradaDto } from '../dto/comprar-entrada.dto';
+import { ComprasPaginationDto } from '../dto/compras-pagination.dto';
 import { Compra } from '../entities/compra.entity';
 import { EstadoCompra } from '../enums/estado-compra.enum';
-import { ComprasPaginationDto } from '../dto/compras-pagination.dto';
 
 @Injectable()
 export class ComprasClienteService {
