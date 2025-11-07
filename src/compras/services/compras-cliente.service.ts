@@ -18,6 +18,7 @@ import { DataSource, Not, Repository } from 'typeorm';
 import { ComprarEntradaDto } from '../dto/comprar-entrada.dto';
 import { Compra } from '../entities/compra.entity';
 import { EstadoCompra } from '../enums/estado-compra.enum';
+import { ComprasPaginationDto } from '../dto/compras-pagination.dto';
 
 @Injectable()
 export class ComprasClienteService {
@@ -218,14 +219,16 @@ export class ComprasClienteService {
    */
   async getComprasDeCliente(
     clienteId: number,
-    paginationDto: PaginationDto,
+    paginationDto: ComprasPaginationDto,
   ): Promise<PaginatioResponseDto<Compra>> {
     const { limit = 10, page = 0 } = paginationDto;
 
     const [result, total] = await this.comprasRepository.findAndCount({
       where: {
         cliente: { userId: clienteId },
-        estado: Not(EstadoCompra.INICIADA),
+        estado: paginationDto.estado
+          ? paginationDto.estado
+          : Not(EstadoCompra.INICIADA),
       },
       relations: [
         'tickets',

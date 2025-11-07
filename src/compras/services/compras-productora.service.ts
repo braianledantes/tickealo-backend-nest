@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginatioResponseDto } from 'src/commun/dto/pagination-response.dto';
-import { PaginationDto } from 'src/commun/dto/pagination.dto';
 import { Entrada } from 'src/eventos/entities/entrada.entity';
 import { EstadoTicket } from 'src/tickets/enums/estado-ticket.enum';
 import { TicketsService } from 'src/tickets/tickets.service';
 import { DataSource, Not, Repository } from 'typeorm';
+import { ComprasPaginationDto } from '../dto/compras-pagination.dto';
 import { Compra } from '../entities/compra.entity';
 import { EstadoCompra } from '../enums/estado-compra.enum';
 
@@ -25,7 +25,7 @@ export class ComprasProductoraService {
    */
   async getComprasDeMisEventos(
     productoraId: number,
-    paginationDto: PaginationDto,
+    paginationDto: ComprasPaginationDto,
   ): Promise<PaginatioResponseDto<Compra>> {
     const { limit = 10, page = 0 } = paginationDto;
 
@@ -34,7 +34,9 @@ export class ComprasProductoraService {
         tickets: {
           entrada: { evento: { productora: { userId: productoraId } } },
         },
-        estado: Not(EstadoCompra.INICIADA),
+        estado: paginationDto.estado
+          ? paginationDto.estado
+          : Not(EstadoCompra.INICIADA),
       },
       relations: [
         'cliente',

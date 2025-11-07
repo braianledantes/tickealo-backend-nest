@@ -31,6 +31,7 @@ import { ComprasService } from './services/compras.service';
 import { ComprarEntradaDto } from './dto/comprar-entrada.dto';
 import { ComprasClienteService } from './services/compras-cliente.service';
 import { ComprasProductoraService } from './services/compras-productora.service';
+import { ComprasPaginationDto } from './dto/compras-pagination.dto';
 
 @ApiTags('Compras')
 @ApiBearerAuth()
@@ -124,7 +125,7 @@ export class ComprasController {
   @Get()
   getMisCompras(
     @GetUser('id') userId: number,
-    @Query() paginationDto: PaginationDto,
+    @Query() paginationDto: ComprasPaginationDto,
   ) {
     return this.comprasProductoraService.getComprasDeMisEventos(
       userId,
@@ -180,7 +181,7 @@ export class ComprasController {
   @Get('mis-compras')
   getMisComprasCliente(
     @GetUser('id') userId: number,
-    @Query() paginationDto: PaginationDto,
+    @Query() paginationDto: ComprasPaginationDto,
   ) {
     return this.comprasClienteService.getComprasDeCliente(
       userId,
