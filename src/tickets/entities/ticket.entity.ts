@@ -52,8 +52,10 @@ export class Ticket {
   entrada: Entrada;
 
   @JoinColumn({ name: 'compra_id' })
-  @ManyToOne(() => Compra, (compra) => compra.tickets)
-  compra: Compra;
+  @ManyToOne(() => Compra, (compra) => compra.tickets, {
+    nullable: true,
+  })
+  compra: Compra | null;
 
   @JoinColumn({ name: 'validated_by' })
   @ManyToOne(() => Validador, (validator) => validator.tickets, {

@@ -291,6 +291,7 @@ export class TicketsService {
 
       transferencia.status = EstadoTransferencia.ACEPTADA;
       transferencia.ticket.cliente = transferencia.clienteReceptor;
+      transferencia.ticket.compra = null;
 
       await queryRunner.manager.save(transferencia.ticket);
       await queryRunner.manager.save(transferencia);
