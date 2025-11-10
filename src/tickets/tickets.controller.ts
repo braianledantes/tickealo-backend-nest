@@ -95,4 +95,13 @@ export class TicketsController {
   ) {
     return this.ticketsService.aceptarTransferencia(userId, transferenciaId);
   }
+
+  @Roles(Role.Cliente)
+  @Post('transferencias/:transferenciaId/rechazar')
+  rechazarTransferencia(
+    @GetUser('id') userId: number,
+    @Param('transferenciaId', ParseIntPipe) transferenciaId: number,
+  ) {
+    return this.ticketsService.rechazarTransferencia(userId, transferenciaId);
+  }
 }

@@ -185,6 +185,10 @@ export class TicketsService {
       );
     }
 
+    if (ticket.estado === EstadoTicket.TRANSFERIDO) {
+      throw new BadRequestException('El ticket ya ha sido transferido');
+    }
+
     if (ticket.estado !== EstadoTicket.PENDIENTE_VALIDACION) {
       throw new BadRequestException(
         'El ticket no está con el estado pendiente de validación',
@@ -218,7 +222,10 @@ export class TicketsService {
       ticket: ticket,
     });
 
+    ticket.estado = EstadoTicket.TRANSFERIDO;
+
     await this.transferenciasRepository.save(transferencia);
+    await this.ticketsRepository.save(ticket);
 
     // Enviar email de notificación al receptor
     await this.mailService.sendTicketTransferNotification(
@@ -292,6 +299,7 @@ export class TicketsService {
       transferencia.status = EstadoTransferencia.ACEPTADA;
       transferencia.ticket.cliente = transferencia.clienteReceptor;
       transferencia.ticket.compra = null;
+      transferencia.ticket.estado = EstadoTicket.PENDIENTE_VALIDACION;
 
       await queryRunner.manager.save(transferencia.ticket);
       await queryRunner.manager.save(transferencia);
@@ -303,5 +311,34 @@ export class TicketsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  /**
+   * Rechaza una transferencia de ticket pendiente.
+   * @param userId ID del cliente receptor que rechaza la transferencia.
+   * @param transferenciaId ID de la transferencia a rechazar.
+   * @throws NotFoundException si la transferencia no existe.
+   * @throws UnauthorizedException si el cliente receptor no tiene permiso para rechazar la transferencia.
+   */
+  async rechazarTransferencia(userId: number, transferenciaId: number) {
+    const transferencia = await this.transferenciasRepository.findOne({
+      where: { id: transferenciaId },
+      relations: ['ticket', 'clienteReceptor'],
+    });
+
+    if (!transferencia) {
+      throw new NotFoundException('Transferencia no encontrada');
+    }
+
+    if (transferencia.clienteReceptor.userId !== userId) {
+      throw new UnauthorizedException(
+        'No tienes permiso para rechazar esta transferencia',
+      );
+    }
+
+    transferencia.status = EstadoTransferencia.RECHAZADA;
+    transferencia.ticket.estado = EstadoTicket.PENDIENTE_VALIDACION;
+    await this.ticketsRepository.save(transferencia.ticket);
+    await this.transferenciasRepository.save(transferencia);
   }
 }

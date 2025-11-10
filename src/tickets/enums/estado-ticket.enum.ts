@@ -19,4 +19,8 @@ export enum EstadoTicket {
    * El ticket ha sido rechazado o la compra cancelada.
    */
   RECHAZADO = 'RECHAZADO',
+  /**
+   * El ticket se ha transferido a otro usuario.
+   */
+  TRANSFERIDO = 'TRANSFERIDO',
 }
