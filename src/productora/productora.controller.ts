@@ -182,8 +182,11 @@ export class ProductoraController {
   })
   @ApiResponse({ status: 404, description: 'Productora no encontrada' })
   @Get(':idProductora')
-  getProductora(@Param('idProductora', ParseIntPipe) idProductora: number) {
-    return this.productoraService.findOneById(idProductora);
+  getProductora(
+    @GetUser('id') userId: number,
+    @Param('idProductora', ParseIntPipe) idProductora: number,
+  ) {
+    return this.productoraService.findOneById(userId, idProductora);
   }
 
   @ApiOperation({

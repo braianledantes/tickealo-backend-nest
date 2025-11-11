@@ -130,11 +130,12 @@ export class ProductoraService {
 
   /**
    * Finds a productora by its ID.
+   *
    * @param id - The ID of the productora to find.
    * @returns The productora entity.
    * @throws NotFoundException if the productora is not found.
    */
-  async findOneById(id: number) {
+  async findOneById(userId: number, id: number) {
     const productora = await this.productoraRepository.findOne({
       where: { userId: id },
       relations: ['user', 'seguidores'],
@@ -144,10 +145,15 @@ export class ProductoraService {
       throw new NotFoundException('Productora no encontrada');
     }
 
+    const isSeguido = productora.seguidores.some(
+      (seguidor) => seguidor.userId === userId,
+    );
+
     const { seguidores, ...productoraData } = productora;
 
     return {
       ...productoraData,
+      isSeguido,
       cantSeguidores: seguidores.length,
     };
   }
