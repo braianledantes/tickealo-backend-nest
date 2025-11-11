@@ -7,13 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientesService } from 'src/clientes/clientes.service';
 import { MailService } from 'src/mail/mail.service';
-import { DataSource, Repository } from 'typeorm';
-import {
-  EstadoTransferencia,
-  TicketTransferencia,
-} from './entities/ticket-transferencia.entity';
+import { DataSource, Not, Repository } from 'typeorm';
+import { TicketTransferencia } from './entities/ticket-transferencia.entity';
 import { Ticket } from './entities/ticket.entity';
 import { EstadoTicket } from './enums/estado-ticket.enum';
+import { EstadoTransferencia } from './enums/estado-ticket-transferencia.enum';
 
 @Injectable()
 export class TicketsService {
@@ -121,7 +119,35 @@ export class TicketsService {
       order: { id: 'DESC' },
     });
 
-    return { tickets };
+    const tt = await Promise.all(
+      tickets.map(async (t) => {
+        const isTransferido = await this.isTicketTransferido(
+          t.id,
+          t.cliente.userId,
+        );
+
+        return { ...t, isTransferido };
+      }),
+    );
+
+    return { tickets: tt };
+  }
+
+  /**
+   * Verifica si un ticket ha sido transferido a otro usuario.
+   * @param ticketId ID del ticket.
+   * @param userId ID del usuario propietario original del ticket.
+   * @returns true si el ticket ha sido transferido, false en caso contrario.
+   */
+  private async isTicketTransferido(ticketId: number, userId: number) {
+    const transferencia = await this.transferenciasRepository.findOne({
+      where: {
+        ticket: { id: ticketId },
+        status: Not(EstadoTransferencia.RECHAZADA),
+        clienteReceptor: { userId },
+      },
+    });
+    return transferencia ? true : false;
   }
 
   /**
@@ -142,7 +168,18 @@ export class TicketsService {
       order: { id: 'DESC' },
     });
 
-    return { tickets };
+    const tt = await Promise.all(
+      tickets.map(async (t) => {
+        const isTransferido = await this.isTicketTransferido(
+          t.id,
+          t.cliente.userId,
+        );
+
+        return { ...t, isTransferido };
+      }),
+    );
+
+    return { tickets: tt };
   }
 
   /**
@@ -172,7 +209,7 @@ export class TicketsService {
 
     const ticket = await this.ticketsRepository.findOne({
       where: { id: ticketId },
-      relations: ['cliente', 'entrada', 'entrada.evento'],
+      relations: ['cliente', 'entrada', 'entrada.evento', 'compra'],
     });
 
     if (!ticket) {
@@ -198,6 +235,12 @@ export class TicketsService {
     if (emisor.userId === receptor.userId) {
       throw new BadRequestException(
         'No puedes transferir un ticket a ti mismo',
+      );
+    }
+
+    if (!ticket.compra) {
+      throw new BadRequestException(
+        'No se puede transferir un ticket transferido',
       );
     }
 

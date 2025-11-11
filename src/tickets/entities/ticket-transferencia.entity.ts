@@ -8,12 +8,7 @@ import {
 } from 'typeorm';
 import { Cliente } from '../../clientes/entities/cliente.entity';
 import { Ticket } from './ticket.entity';
-
-export enum EstadoTransferencia {
-  PENDIENTE = 'pendiente',
-  ACEPTADA = 'aceptada',
-  RECHAZADA = 'rechazada',
-}
+import { EstadoTransferencia } from '../enums/estado-ticket-transferencia.enum';
 
 @Entity()
 export class TicketTransferencia {
