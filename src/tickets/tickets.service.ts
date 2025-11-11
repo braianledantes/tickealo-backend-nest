@@ -112,6 +112,7 @@ export class TicketsService {
       where: { entrada: { evento: { id: idEvento } } },
       relations: [
         'entrada',
+        'cliente',
         'validatedBy',
         'validatedBy.cliente',
         'validatedBy.cliente.user',
