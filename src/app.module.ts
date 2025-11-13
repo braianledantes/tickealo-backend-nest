@@ -19,6 +19,7 @@ import { RecordatoriosModule } from './recordatorios/recordatorios.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { UsersModule } from './users/users.module';
 import { ValidadorModule } from './validador/validador.module';
+import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ValidadorModule } from './validador/validador.module';
     FavoritosModule,
     RecordatoriosModule,
     CountriesModule,
+    MercadoPagoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
