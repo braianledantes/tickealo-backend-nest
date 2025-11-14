@@ -20,6 +20,7 @@ import { TicketsModule } from './tickets/tickets.module';
 import { UsersModule } from './users/users.module';
 import { ValidadorModule } from './validador/validador.module';
 import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
+import { CreditosModule } from './creditos/creditos.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { MercadoPagoModule } from './mercado-pago/mercado-pago.module';
     RecordatoriosModule,
     CountriesModule,
     MercadoPagoModule,
+    CreditosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

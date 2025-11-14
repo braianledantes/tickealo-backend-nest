@@ -1,4 +1,3 @@
-import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
 import {
   Column,
   Entity,
@@ -9,10 +8,12 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Evento } from '../../eventos/entities/evento.entity';
-import { Validador } from '../../validador/entities/validador.entity';
 import { Cliente } from '../../clientes/entities/cliente.entity';
+import { HistorialCredito } from '../../creditos/entities/historial-credito.entity';
+import { CuentaBancaria } from '../../cuentabancaria/entities/cuenta-bancaria.entity';
+import { Evento } from '../../eventos/entities/evento.entity';
+import { User } from '../../users/entities/user.entity';
+import { Validador } from '../../validador/entities/validador.entity';
 
 @Entity()
 export class Productora {
@@ -52,6 +53,9 @@ export class Productora {
 
   @OneToMany(() => Evento, (evento) => evento.productora)
   eventos: Evento[];
+
+  @OneToMany(() => HistorialCredito, (historial) => historial.productora)
+  historialCreditos: HistorialCredito[];
 
   @ManyToMany(() => Validador, (validador) => validador.productoras)
   @JoinTable({

@@ -14,6 +14,14 @@ $ cp .env.example .env
 $ npm install
 ```
 
+- Recommended to configure the environment variables with a HTTP tunnel service like [ngrok](https://ngrok.com/) or [devtunnels](https://code.visualstudio.com/docs/remote/tunnels).
+
+- Create a database using docker or locally, and set the connection variables in the `.env` file.
+
+- Create an account in [Mercado Pago](https://www.mercadopago.com.ar/) and get your access token to set the `MP_ACCESS_TOKEN` variable in the `.env` file.
+
+- Create a [Cloudinary](https://cloudinary.com/) account and get your cloud name, API key and API secret to set the `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET` variables in the `.env` file.
+
 ## Compile and run the project
 
 ```bash

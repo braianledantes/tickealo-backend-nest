@@ -83,9 +83,9 @@ export class MailService {
   ): Promise<void> {
     const apiUrl = this.configService.get<string>(
       'API_URL',
-      'http://localhost:3000',
+      'http://localhost:3000/api',
     );
-    const verificationUrl = `${apiUrl}/api/auth/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${apiUrl}/auth/verify-email?token=${verificationToken}`;
 
     const templatePaht = path.join(
       __dirname,
@@ -128,7 +128,7 @@ export class MailService {
   ): Promise<void> {
     const apiUrl = this.configService.get<string>(
       'API_URL',
-      'http://localhost:3000',
+      'http://localhost:3000/api',
     );
     const eventoUrl = `${apiUrl}/eventos/${eventoId}`;
 
@@ -238,7 +238,7 @@ Ver más detalles: ${eventoUrl}
   ): Promise<void> {
     const apiUrl = this.configService.get<string>(
       'API_URL',
-      'http://localhost:3000',
+      'http://localhost:3000/api',
     );
     const aceptarUrl = `${apiUrl}/transferencias/${transferenciaId}/aceptar`;
 

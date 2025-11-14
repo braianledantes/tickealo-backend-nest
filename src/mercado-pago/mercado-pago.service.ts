@@ -3,14 +3,24 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { Request } from 'express';
 import MercadoPagoConfig, { Payment, Preference } from 'mercadopago';
+import { CreditosService } from 'src/creditos/creditos.service';
 import { User } from 'src/users/entities/user.entity';
+import { CreateCreditoDto } from './dto/create-credito.dto';
 
 @Injectable()
 export class MercadoPagoService {
   private readonly client: MercadoPagoConfig;
   private readonly notificationSecret: string;
+  private readonly apiUrl: string;
+  private readonly frontendUrl: string;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly creditosService: CreditosService,
+  ) {
+    this.apiUrl = this.configService.getOrThrow<string>('API_URL');
+    this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+
     const accessToken =
       this.configService.getOrThrow<string>('MP_ACCESS_TOKEN');
 
@@ -21,7 +31,7 @@ export class MercadoPagoService {
     );
   }
 
-  async createPreference(user: User) {
+  async createPreference(user: User, createCreditoDto: CreateCreditoDto) {
     const preference = new Preference(this.client);
 
     try {
@@ -29,15 +39,22 @@ export class MercadoPagoService {
         body: {
           items: [
             {
-              id: '1234',
-              title: 'Créditos',
-              quantity: 100,
-              unit_price: 15,
+              id: createCreditoDto.id,
+              title: createCreditoDto.title,
+              quantity: createCreditoDto.quantity,
+              unit_price: createCreditoDto.price / createCreditoDto.quantity,
+              currency_id: 'ARS',
             },
           ],
+          back_urls: {
+            success: `${this.frontendUrl}/dashboard/creditos`,
+            failure: `${this.frontendUrl}/compra-fallida`,
+            pending: `${this.frontendUrl}/compra-pendiente`,
+          },
+          auto_return: 'approved',
           external_reference: user.id.toString(),
-          notification_url:
-            'https://spry-consortable-jeramy.ngrok-free.dev/api/mercado-pago/webhook',
+          //notification_url: `${this.apiUrl}/mercado-pago/webhook`,
+          notification_url: `https://k5z9pqh3-3000.brs.devtunnels.ms/api/mercado-pago/webhook`,
         },
       });
 
@@ -128,7 +145,30 @@ export class MercadoPagoService {
       const paymentInfo = await payment.get({ id: paymentId });
 
       const userId = paymentInfo.external_reference;
-      const items = paymentInfo.additional_info?.items || [];
+      const items = paymentInfo.additional_info?.items;
+
+      if (!userId || !items) {
+        return;
+      }
+
+      const cantCreditos = items.reduce(
+        (sum, item) => sum + parseFloat(item.quantity.toString()),
+        0,
+      );
+      const price = items.reduce(
+        (sum, item) =>
+          sum +
+          parseFloat(item.unit_price.toString()) *
+            parseFloat(item.quantity.toString()),
+        0,
+      );
+
+      await this.creditosService.create({
+        paymentId: paymentId,
+        creditos: cantCreditos,
+        userId: parseInt(userId, 10),
+        price: price,
+      });
     } catch (error) {
       console.error('Error fetching payment info:', error);
     }
