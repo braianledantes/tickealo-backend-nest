@@ -42,7 +42,7 @@ export class Productora {
   @Column({ name: 'imagen_url', nullable: true, type: 'varchar' })
   imagenUrl: string | null;
 
-  @Column({ name: 'creditos_disponibles', type: 'int', default: 0 })
+  @Column({ name: 'creditos_disponibles', type: 'int', default: 50 })
   creditosDisponibles: number;
 
   @Column({ type: 'float', default: 0 })
