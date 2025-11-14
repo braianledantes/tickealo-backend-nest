@@ -62,6 +62,12 @@ export class EventosProductoraService {
       stock: entrada.cantidad,
     }));
 
+    if (productora.creditosDisponibles < capacidad) {
+      throw new BadRequestException(
+        'No tienes créditos suficientes para crear este evento',
+      );
+    }
+
     const evento = this.eventoRepository.create({
       ...createEventoDto,
       capacidad,
@@ -72,6 +78,15 @@ export class EventosProductoraService {
       entradas,
     });
     const eventoSaved = await this.eventoRepository.save(evento);
+
+    await this.productoraService.updateProductora(
+      productora.userId,
+      productora.user,
+      {
+        creditosDisponibles: productora.creditosDisponibles - capacidad,
+      },
+    );
+
     return this.eventoRepository.findOne({
       where: { id: eventoSaved.id },
       relations: ['lugar', 'productora', 'cuentaBancaria', 'entradas'],
