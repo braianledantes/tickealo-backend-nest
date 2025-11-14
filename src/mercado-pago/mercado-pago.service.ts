@@ -53,8 +53,7 @@ export class MercadoPagoService {
           },
           auto_return: 'approved',
           external_reference: user.id.toString(),
-          //notification_url: `${this.apiUrl}/mercado-pago/webhook`,
-          notification_url: `https://k5z9pqh3-3000.brs.devtunnels.ms/api/mercado-pago/webhook`,
+          notification_url: `${this.apiUrl}/mercado-pago/webhook`,
         },
       });
 
