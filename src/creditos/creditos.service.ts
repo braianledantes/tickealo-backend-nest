@@ -22,19 +22,14 @@ export class CreditosService {
       throw new NotFoundException('Productora not found for the given user ID');
     }
 
-    const lastCredito = await this.historialCreditoRepository.findOne({
-      where: { productora: { userId: createCreditoDto.userId } },
-      order: { id: 'DESC' },
-    });
+    const lastCredito = productora.creditosDisponibles;
 
     const historialCredito = this.historialCreditoRepository.create({
       paymentId: createCreditoDto.paymentId,
       creditos: createCreditoDto.creditos,
       productora: productora,
-      creditosPrevios: lastCredito ? lastCredito.creditosPosterior : 0,
-      creditosPosterior: lastCredito
-        ? lastCredito.creditosPosterior + createCreditoDto.creditos
-        : createCreditoDto.creditos,
+      creditosPrevios: lastCredito,
+      creditosPosterior: lastCredito + createCreditoDto.creditos,
       precio: createCreditoDto.price,
     });
 
