@@ -18,9 +18,14 @@ import { ComprarEntradaDto } from '../dto/comprar-entrada.dto';
 import { ComprasPaginationDto } from '../dto/compras-pagination.dto';
 import { Compra } from '../entities/compra.entity';
 import { EstadoCompra } from '../enums/estado-compra.enum';
+import { Punto } from '../entities/punto.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ComprasClienteService {
+  private valorDelPunto: number;
+  private descuentoPorPunto: number;
+
   constructor(
     @InjectRepository(Compra)
     private readonly comprasRepository: Repository<Compra>,
@@ -28,7 +33,16 @@ export class ComprasClienteService {
     private readonly ticketsService: TicketsService,
     private readonly filesService: FileUploadService,
     private readonly dataSource: DataSource,
-  ) {}
+    configService: ConfigService,
+  ) {
+    const valorDelPunto = configService.get<number>('VALOR_PUNTO', 1000);
+    const descuentoPorPunto = configService.get<number>(
+      'PORCENTAJE_DESCUENTO_POR_PUNTO',
+      1,
+    );
+    this.valorDelPunto = Number(valorDelPunto);
+    this.descuentoPorPunto = Number(descuentoPorPunto);
+  }
 
   /**
    * Permite a un cliente comprar entradas para un evento específico.
@@ -43,7 +57,7 @@ export class ComprasClienteService {
     userId: number,
     comprarEntradaDto: ComprarEntradaDto,
   ): Promise<Compra | null> {
-    const { idEntrada, cant } = comprarEntradaDto;
+    const { idEntrada, cant, cantPuntos: puntosUsados } = comprarEntradaDto;
 
     // Iniciamos una transacción para garantizar atomicidad
     const queryRunner = this.dataSource.createQueryRunner();
@@ -66,31 +80,73 @@ export class ComprasClienteService {
       }
 
       // verifico que el evento no haya finalizado
-      const currentDate = new Date();
+      const resNow: { now: Date }[] = await this.dataSource.manager.query(
+        'SELECT NOW() AS now',
+      );
+      const now = resNow[0].now.getTime();
+      const currentDate = new Date(now);
+
       if (entrada.evento.finAt < currentDate) {
         throw new BadRequestException(
           'No se pueden comprar entradas porque el evento ya ha finalizado.',
         );
       }
 
-      // Verifico stock con el dato bloqueado (crítico para evitar overselling)
+      // Verifico que haya suficiente stock
       if (entrada.stock < cant) {
         throw new BadRequestException(
           `No hay suficientes entradas disponibles. Quedan ${entrada.stock} entradas.`,
         );
       }
 
-      const montoTotal = Number(entrada.precio) * cant;
+      // Verifica que el cliente tenga suficientes puntos
+      const puntosPrevios = cliente.puntosAcumulados;
+      if (puntosUsados > puntosPrevios) {
+        throw new BadRequestException(
+          `No tienes suficientes puntos. Tienes ${puntosPrevios} puntos.`,
+        );
+      }
 
-      // Creo la compra dentro de la transacción
+      // Calculo el monto total con descuento por puntos
+      const descuento = puntosUsados * this.descuentoPorPunto;
+      const totalSinDescuento = Number(entrada.precio) * cant;
+      const totalConDescuento = totalSinDescuento * (1 - descuento / 100);
+
+      // Verifico que el total no sea negativo
+      if (totalConDescuento < 0) {
+        throw new BadRequestException(
+          'El monto total de la compra no puede ser negativo.',
+        );
+      }
+
+      // Calculo los puntos que se ganan con esta compra
+      const puntosGanados = Math.floor(totalConDescuento / this.valorDelPunto);
+      const puntosObtenidos = puntosGanados - puntosUsados;
+      // actualizo los puntos del cliente
+      cliente.puntosAcumulados += puntosObtenidos;
+
+      // Guardo la compra para obtener su ID
       const compra = queryRunner.manager.create(Compra, {
-        monto: montoTotal,
+        monto: totalConDescuento,
         cliente: cliente,
       });
-
       const compraGuardada = await queryRunner.manager.save(compra);
 
-      // Creo los tickets dentro de la transacción
+      // Creo el registro de puntos asociado a esta compra
+      const fechaVencimiento = new Date(
+        currentDate.getTime() + 365 * 24 * 60 * 60 * 1000,
+      );
+      const puntos = queryRunner.manager.create(Punto, {
+        puntosUsados: puntosUsados,
+        puntosGanados: puntosGanados,
+        puntosPrevios: puntosPrevios,
+        puntosObtenidos: puntosObtenidos,
+        fechaVencimiento: fechaVencimiento,
+        cliente: cliente,
+        compra: compraGuardada,
+      });
+
+      // Creo los tickets asociados a la compra
       const lastTicket = await queryRunner.manager.findOne(Ticket, {
         where: {},
         order: { codigoAlfanumerico: 'DESC' },
@@ -105,7 +161,6 @@ export class ComprasClienteService {
       const tickets: Ticket[] = [];
       for (let i = 0; i < cant; i++) {
         const codigoAlfanumerico = generarSiguienteCodigoAlfanumerico(lastCode);
-        // creo el ticket usando el manager de la transacción
         const ticket = queryRunner.manager.create(Ticket, {
           codigoAlfanumerico,
           cliente,
@@ -116,9 +171,13 @@ export class ComprasClienteService {
 
         lastCode = codigoAlfanumerico;
       }
+
+      // Guardo los cambios en la transacción
+      await queryRunner.manager.save(puntos);
+      await queryRunner.manager.save(cliente);
       await queryRunner.manager.save(tickets);
 
-      // Decremento el stock de manera atómica dentro de la transacción
+      // Decremento el stock
       await queryRunner.manager.decrement(
         Entrada,
         { id: idEntrada },

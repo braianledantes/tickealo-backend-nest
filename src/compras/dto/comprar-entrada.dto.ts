@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsPositive } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, Min } from 'class-validator';
 
 export class ComprarEntradaDto {
   @ApiProperty({
@@ -22,6 +22,16 @@ export class ComprarEntradaDto {
   @IsInt()
   @IsPositive()
   cant: number;
+
+  @ApiPropertyOptional({
+    description: 'Cantidad de puntos a utilizar en la compra',
+    example: 100,
+    minimum: 0,
+  })
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  cantPuntos: number;
 
   @ApiPropertyOptional({
     description: 'Comprobante de transferencia bancaria',

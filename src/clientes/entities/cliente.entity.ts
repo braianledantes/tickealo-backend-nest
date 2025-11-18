@@ -16,6 +16,7 @@ import { Recordatorio } from '../../recordatorios/entities/recordatorio.entity';
 import { TicketTransferencia } from '../../tickets/entities/ticket-transferencia.entity';
 import { Ticket } from '../../tickets/entities/ticket.entity';
 import { User } from '../../users/entities/user.entity';
+import { Punto } from '../../compras/entities/punto.entity';
 
 @Entity()
 export class Cliente {
@@ -88,4 +89,7 @@ export class Cliente {
     (transferencia) => transferencia.clienteReceptor,
   )
   transferenciasRecibidas: TicketTransferencia[];
+
+  @OneToMany(() => Punto, (punto) => punto.cliente)
+  puntos: Punto[];
 }
