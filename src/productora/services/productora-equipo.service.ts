@@ -59,17 +59,10 @@ export class ProductoraEquipoService {
       throw new NotFoundException('La productora no existe');
     }
 
-    // Buscar el validador por su email y si no existe, crearlo
-    let validador = await this.validadorService.findOneByEmail(userEmail);
-    // Si el validador no existe, crear uno nuevo
-    if (!validador) {
-      validador = await this.validadorService.createValidador(userEmail);
-      // Asignar el rol de validador al usuario
-      await this.usersService.asignarRolUsuario(
-        validador.userId,
-        Role.Validador,
-      );
-    }
+    // Crear o buscar el validador por su email
+    const validador = await this.validadorService.createValidador(userEmail);
+    // Asignar el rol de validador al usuario
+    await this.usersService.asignarRolUsuario(validador.userId, Role.Validador);
 
     // Verificar si el validador ya es miembro del equipo
     const isMember = productora.validadores.some(
@@ -136,7 +129,6 @@ export class ProductoraEquipoService {
         validador.userId,
         Role.Validador,
       );
-      await this.validadorService.removeValidador(validador.userId);
     }
 
     return this.productoraRepository.findOne({
