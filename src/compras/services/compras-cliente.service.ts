@@ -38,7 +38,7 @@ export class ComprasClienteService {
     const valorDelPunto = configService.get<number>('VALOR_PUNTO', 1000);
     const descuentoPorPunto = configService.get<number>(
       'PORCENTAJE_DESCUENTO_POR_PUNTO',
-      1,
+      0.1,
     );
     this.valorDelPunto = Number(valorDelPunto);
     this.descuentoPorPunto = Number(descuentoPorPunto);
