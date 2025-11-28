@@ -160,6 +160,7 @@ export class TicketsService {
     const tickets = await this.ticketsRepository.find({
       where: { cliente: { userId: userId } },
       relations: [
+        'cliente',
         'entrada',
         'entrada.evento',
         'validatedBy',
