@@ -163,6 +163,7 @@ export class TicketsService {
         'cliente',
         'entrada',
         'entrada.evento',
+        'compra',
         'validatedBy',
         'validatedBy.cliente',
         'validatedBy.cliente.user',
