@@ -11,9 +11,10 @@
   --accent-bg: #1a2332;
   --text-primary: #ffffff;
   --text-secondary: #b8c5d6;
+  --title-presentacion:#CAF0F8;
   --accent-color: #0260ed;
   --accent-hover: #024bb8;
-  --border-color: #1a3a5c;
+  --border-color: #160078;
   --shadow-light: rgba(2, 96, 237, 0.1);
   --shadow-medium: rgba(2, 96, 237, 0.2);
 }
@@ -34,7 +35,6 @@ body {
   margin: 0 auto;
   padding: 0 20px;
 }
-
 header {
   background: radial-gradient(
     ellipse at top,
@@ -43,7 +43,6 @@ header {
   );
   padding: 2rem 0;
   text-align: center;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .header-content {
@@ -76,6 +75,46 @@ main {
   padding: 1rem 0;
 }
 
+/* ***********************************STYLES PARA PRESENTACION******************************************/
+.presentacion{
+  max-width: 100%;
+  margin: 0 auto 2rem auto;
+  text-align: center;
+}
+.p-title {
+  color: var(--title-presentacion)!important;
+  font-style: italic;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.presentacion-wrapper {
+  width: 100%;
+  max-width: 100%;
+  margin: 1rem auto;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0,0,0,0.4);
+}
+
+.presentacion-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.developers-card {
+  padding: 2rem;
+}
+
+.developers-card h2{
+  margin-bottom: 1rem;
+}
+
+/* *****************************************************************************************************/
+
+
 .intro {
   max-width: 800px;
   margin: 0 auto 2rem auto;
@@ -86,9 +125,12 @@ main {
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 1rem;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
   }
 }
 
+.presentacion-section,
 .intro-section,
 .repos-section,
 .project-section,
@@ -100,7 +142,6 @@ main {
 .intro-card,
 .repos-card,
 .project-card,
-.developers-card,
 .documentos-card {
   background: var(--secondary-bg);
   border: 1px solid var(--border-color);
@@ -114,11 +155,12 @@ main {
 .intro-card h2,
 .repos-card h2,
 .project-card h2,
-.developers-card h2,
 .documentos-card h2 {
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -399,7 +441,6 @@ main {
 footer {
   padding: 2rem 0;
   margin-top: 2rem;
-  border-top: 1px solid var(--border-color);
   background: radial-gradient(
     ellipse at bottom,
     var(--border-color) 0%,
