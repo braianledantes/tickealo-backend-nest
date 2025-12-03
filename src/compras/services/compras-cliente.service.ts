@@ -79,6 +79,13 @@ export class ComprasClienteService {
         throw new NotFoundException('La entrada no existe.');
       }
 
+      // verifco que el evento no este cancelado
+      if (entrada.evento.cancelado) {
+        throw new BadRequestException(
+          'No se pueden comprar entradas para un evento cancelado.',
+        );
+      }
+
       // verifico que el evento no haya finalizado
       const resNow: { now: Date }[] = await this.dataSource.manager.query(
         'SELECT NOW() AS now',
